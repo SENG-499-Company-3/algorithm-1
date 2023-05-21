@@ -1,0 +1,8 @@
+name: algo1
+
+dependencies:
+  - numpy
+  - matplotlib
+  - pytorch
+  - tensorflow
+  - tensorboard

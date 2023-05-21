@@ -1,0 +1,3 @@
+gym
+fastapi
+fastapi-code-generator
