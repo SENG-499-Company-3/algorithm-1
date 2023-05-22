@@ -1,4 +1,5 @@
-ARG UBUNTU_VER=22.04
+ARG OS=archlinux
+ARG OS_VER=latest
 ARG CONDA_VER=latest
 ARG OS_TYPE=x86_64
 ARG PY_VER=3.9.13
@@ -6,10 +7,8 @@ ARG ENV_NAME=algo1
 ARG ENV_FILE=./environment.yml
 ARG REQ_FILE=./requirements.txt
 
-FROM ubuntu:${UBUNTU_VER}
+FROM ${OS}:${OS_VER}
 WORKDIR ./app
-
-RUN apt-get update && apt-get install -yq curl wget jq vim
 
 ARG CONDA_VER
 ARG OS_TYPE

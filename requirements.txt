@@ -1,3 +1,10 @@
-gym
 fastapi
 fastapi-code-generator
+gym
+ray[rllib]
+ray[train]
+ray[tune]
+ray[serve]
+
+
+
