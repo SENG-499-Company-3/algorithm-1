@@ -8,13 +8,17 @@ To create the container in Windows (Powershell), MacOS (apple silicon zsh) and L
 
 To run the container: 
 
-  "cd <path/to/directory/with/Dockerile/>"
-  "docker container run -it <container id hash>"
+  cd {path/to/directory/with/Dockerile/}
+  docker container run -it {container id hash}
 
 
 To run the virtual environment inside the container:
 
-  "source activate algo1"
+  source activate algo1
+
+To configure the virtual environment in the container:
+
+  pip3 install -r requirements.txt
 
 
 ***NOTE***
