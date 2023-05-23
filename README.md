@@ -2,9 +2,9 @@
 To create the container in Windows (Powershell), MacOS (apple silicon zsh) and Linux (Bash):
 
   docker build -t algorithm-1 -f Dockerfile .
-    --build-arg OS_TYPE=<host architecture> 
-    --build-arg OS=<linux distro> 
-    --build-arg OS_VER=<os version>
+    --build-arg OS_TYPE={host architecture} 
+    --build-arg OS={linux distro}
+    --build-arg OS_VER={os version}
 
 To run the container: 
 
