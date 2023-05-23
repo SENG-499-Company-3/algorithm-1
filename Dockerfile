@@ -2,7 +2,7 @@ ARG OS=archlinux
 ARG OS_VER=latest
 ARG CONDA_VER=latest
 ARG OS_TYPE=x86_64
-ARG PY_VER=3.9.13
+ARG PY_VER=3.10.11
 ARG ENV_NAME=algo1
 ARG ENV_FILE=environment.yml
 ARG REQ_FILE=requirements.txt
@@ -25,6 +25,5 @@ ARG ENV_FILE
 ARG REQ_FILE
 COPY ./ .
 
-RUN conda install -c anaconda -y python=${PY_VER}
+RUN conda install -c conda-forge fastapi
 RUN conda env create --file ${ENV_FILE}
-RUN pip3 install -r ${REQ_FILE}

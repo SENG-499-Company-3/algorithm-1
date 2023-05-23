@@ -1,10 +1,11 @@
 name: algo1
 
 dependencies:
+  - python==3.10.11
   - numpy
   - matplotlib
-  - pytorch
   - tensorflow
   - tensorboard
+  - gymnasium
+  - pytorch
   - dask
-

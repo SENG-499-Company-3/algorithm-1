@@ -1,7 +1,7 @@
 # Algorithm-1
 To create the container in Windows (Powershell) and Linux (Bash):
 
-  "docker build -t algo1 -f Dockerfile ."
+  "docker build -t algorithm-1 -f Dockerfile ."
 
 To run the container: 
 
