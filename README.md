@@ -8,7 +8,6 @@ To create the container in Windows (Powershell), MacOS (apple silicon zsh) and L
 
 To run the container: 
 
-  cd {path/to/directory/with/Dockerile/}
   docker container run -it {container id hash}
 
 
