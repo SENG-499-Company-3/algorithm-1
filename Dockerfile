@@ -4,8 +4,8 @@ ARG CONDA_VER=latest
 ARG OS_TYPE=x86_64
 ARG PY_VER=3.9.13
 ARG ENV_NAME=algo1
-ARG ENV_FILE=./environment.yml
-ARG REQ_FILE=./requirements.txt
+ARG ENV_FILE=environment.yml
+ARG REQ_FILE=requirements.txt
 
 FROM ${OS}:${OS_VER}
 WORKDIR ./app
