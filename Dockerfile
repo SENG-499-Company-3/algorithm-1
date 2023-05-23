@@ -12,7 +12,7 @@ WORKDIR ./app
 ARG CONDA_VER
 ARG OS_TYPE
 
-RUN apt-get -y update; apt-get -y install curl
+RUN if [ "$OS" = "ubuntu" ]; then apt-get -y update; apt-get -y install curl; fi
 RUN curl -LO "http://repo.continuum.io/miniconda/Miniconda3-${CONDA_VER}-Linux-${OS_TYPE}.sh"
 RUN bash Miniconda3-${CONDA_VER}-Linux-${OS_TYPE}.sh -p /miniconda -b
 RUN rm Miniconda3-${CONDA_VER}-Linux-${OS_TYPE}.sh
