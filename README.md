@@ -2,20 +2,20 @@
 To create the container in Windows (Powershell), macOS (intel zsh) 
   and Linux (Bash):
 
-```
+```console
   docker compose up
 ```
   
   
 
 To run the container: 
-```
+```console
   docker compose run api
 ```
 
 
 To create a virtual environment and download the necessary packages inside:
-```
+```console
   conda create --name algo1 python=3.10
   conda activate algo1
   pip3 install -r requirements.txt 
@@ -23,7 +23,7 @@ To create a virtual environment and download the necessary packages inside:
 
 
 To create an apptainer container on a DRAC cluster:
-```
+```console
   cd ~/scratch
   salloc --mem-per-cpu=2000 --cpus-per-task=4 --time=2:0:0
   module load singularity
