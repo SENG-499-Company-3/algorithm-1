@@ -3,7 +3,7 @@ To create the container in Windows (Powershell), MacOS (intel zsh)
   and Linux (Bash):
 
 ```
-docker compose up
+  docker compose up
 ```
   
   
@@ -14,10 +14,10 @@ To run the container:
 ```
 
 
-To create a virtual environment and download the necessary packages:
+To create a virtual environment and download the necessary packages inside:
 ```
   conda create --name algo1 python=3.10
-  conda activ
+  conda activate algo1
   pip3 install -r requirements.txt 
 ```
 
