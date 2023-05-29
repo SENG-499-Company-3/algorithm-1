@@ -1,0 +1,14 @@
+numpy
+matplotlib
+torch
+tensorflow
+tensorboard
+dask
+fastapi
+fastapi-code-generator
+gym
+ray
+ray[rllib]
+ray[train]
+ray[tune]
+ray[serve]
