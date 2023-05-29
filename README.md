@@ -22,6 +22,15 @@ To create a virtual environment and download the necessary packages inside:
 ```
 
 
+To create an apptainer container on a DRAC cluster:
+```
+  cd ~/scratch
+  salloc --mem-per-cpu=2000 --cpus-per-task=4 --time=2:0:0
+  module load singularity
+  singularity build ray.sif docker://ray:latest
+  singularity run ray.sif
+```
+
 
 ###### ***NOTE***:
 Closing shells running the container will *not* shut down the container. 
