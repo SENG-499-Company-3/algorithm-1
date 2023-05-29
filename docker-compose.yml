@@ -1,0 +1,10 @@
+services:
+  api:
+    image: rayproject/ray
+
+    ports: 
+      - "8000"
+    
+    volumes:
+      - .:/app
+

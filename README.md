@@ -2,41 +2,37 @@
 To create the container in Windows (Powershell), MacOS (intel zsh) 
   and Linux (Bash):
 
-  docker build -t algorithm-1 -f Dockerfile .
-
-
-OPTIONAL BUILD ARGUMENTS (system dependent):
-    --build-arg OS_TYPE={host architecture} 
-    --build-arg OS={linux distro}
-    --build-arg OS_VER={os version}
-
-
-E.G. If you run an apple silicon machine (enter the following lines as 1 command):
-  docker build -t algorithm-1 -f Dockerfile . 
-    --build-arg OS_TYPE=aarch64 
-    --build-arg OS=ubuntu 
-    --build-arg=OS_VER=22.04
+```
+  docker compose up
+```
   
   
 
 To run the container: 
-
-  docker container run -it {container id hash}
-
-
-
-To run the virtual environment inside the container:
-
-  source activate algo1
+```
+  docker compose run api
+```
 
 
+To create a virtual environment and download the necessary packages inside:
+```
+  conda create --name algo1 python=3.10
+  conda activate algo1
+  pip3 install -r requirements.txt 
+```
 
-To configure the virtual environment in the container:
 
-  pip3 install -r requirements.txt
+To create an apptainer container on a DRAC cluster:
+```
+  cd ~/scratch
+  salloc --mem-per-cpu=2000 --cpus-per-task=4 --time=2:0:0
+  module load singularity
+  singularity build ray.sif docker://ray:latest
+  singularity run ray.sif
+```
 
 
-***NOTE***
+###### ***NOTE***:
 Closing shells running the container will *not* shut down the container. 
 To shut down the container please type 'exit' into the container shell
 to close the container properly. Improper shut down could lead to 
