@@ -23,7 +23,7 @@ To create a virtual environment and download the necessary packages inside:
 
 
 
-***NOTE***:
+###### ***NOTE***:
 Closing shells running the container will *not* shut down the container. 
 To shut down the container please type 'exit' into the container shell
 to close the container properly. Improper shut down could lead to 
