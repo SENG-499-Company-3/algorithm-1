@@ -2,38 +2,27 @@
 To create the container in Windows (Powershell), MacOS (intel zsh) 
   and Linux (Bash):
 
-  docker build -t algorithm-1 -f Dockerfile .
-
-
-OPTIONAL BUILD ARGUMENTS (system dependent):
-    --build-arg OS_TYPE={host architecture} 
-    --build-arg OS={linux distro}
+```
+  docker build -t algorithm-1 -f Dockerfile . \
+    --build-arg OS_TYPE={host architecture} \
+    --build-arg OS={linux distro} \
     --build-arg OS_VER={os version}
-
-
-E.G. If you run an apple silicon machine (enter the following lines as 1 command):
-  docker build -t algorithm-1 -f Dockerfile . 
-    --build-arg OS_TYPE=aarch64 
-    --build-arg OS=ubuntu 
-    --build-arg=OS_VER=22.04
+```
   
   
 
 To run the container: 
-
-  docker container run -it {container id hash}
-
-
-
-To run the virtual environment inside the container:
-
-  source activate algo1
+```
+  docker compose up
+```
 
 
+To create a virtual environment and download the necessary packages:
+```
+  conda create --name algo1 python=3.10
+  pip3 install -r requirements.txt 
+```
 
-To configure the virtual environment in the container:
-
-  pip3 install -r requirements.txt
 
 
 ***NOTE***
