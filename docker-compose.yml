@@ -1,10 +1,13 @@
-services:
-  api:
-    image: rayproject/ray
+services:  
+  algo1:
+    build: 
+      context: ./api/
+      dockerfile: Dockerfile.dev
 
     ports: 
-      - "8000"
-    
+      - "8265:8265"    
+      - "8000:8000"
+
     volumes:
       - .:/app
 
