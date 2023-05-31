@@ -1,5 +1,6 @@
 import numpy as np
 import ray
+import json
 from ray import serve
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -15,7 +16,7 @@ app = FastAPI()
 @serve.ingress(app)
 class Algorithm1:
 
-    @app.get("/create")
+    @app.post("/create")
     def create_schedule(self) -> JSONResponse:
         courses = 33
         times = 15
@@ -31,12 +32,13 @@ class Algorithm1:
         p_tgt = 3 
         
         hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
-        schedule = jsonable_encoder(hg.solve().sparse())
+        hg.solve()
+        schedule = {str(key): str(val) for key, val in hg.sparse().items()}
         
         return JSONResponse(content=schedule)
     
     @app.post("/validate")
-    def validate_schedule(self, schd: Schedule) -> JSONResponse:
+    def validate_schedule(self) -> JSONResponse:
         courses = 33
         times = 15
         teachers = 29
@@ -51,7 +53,9 @@ class Algorithm1:
         p_tgt = 3 
         
         hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
-        schedule = jsonable_encoder(hg.solve().sparse())
+        hg.solve()
+        schedule = {str(key): str(val) for key, val in hg.sparse().items()}
+        
         return JSONResponse(content=schedule)
 
 deployment_graph = Algorithm1.bind()

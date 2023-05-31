@@ -1,3 +1,6 @@
+import numpy as np
+
+
 val_map = {
     0 : 0,
     20 : 1,

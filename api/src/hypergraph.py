@@ -38,7 +38,7 @@ class HyperGraph:
         
         for course in range(card_c):
             time = np.random.randint(low=0, high=card_ti, size=1)
-            ideal_tc_matches = np.where(self.prefs[:, time, course] >= self.p_tgt)[0]
+            ideal_tc_matches = np.where(self.prefs[:, course] >= self.p_tgt)[0]
             if ideal_tc_matches.size > 0:
                 teacher = np.random.choice(ideal_tc_matches, size=1)
                 tensor[course, time, teacher] = 1
@@ -74,7 +74,7 @@ class HyperGraph:
 
         courses, times, teachers = tensor.nonzero()
         assert(courses.size == times.size == teachers.size)
-        sparse_tensor = {(courses[i], times[i], teachers[i]) : self.prefs[teachers[i], times[i], courses[i]] \
+        sparse_tensor = {(courses[i], times[i], teachers[i]) : self.prefs[teachers[i], courses[i]] \
                             for i in range(courses.size)}
         return sparse_tensor
 
@@ -99,9 +99,9 @@ class HyperGraph:
 
         courses, times, teachers = tensor.nonzero()
         assert(courses.size == teachers.size)
-        assignments = [(teachers[i], times[i], courses[i]) for i in range(courses.size)]
-        p_hat = np.array([self.prefs[assignment] for assignment in assignments], dtype=self.dtype)
-
+        tc_pairs = [(teachers[i], courses[i]) for i in range(courses.size)]
+        p_hat = np.array([self.prefs[tc_pair] for tc_pair in tc_pairs], dtype=self.dtype)
+        
         R = np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
 
         return R
