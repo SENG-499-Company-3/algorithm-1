@@ -19,7 +19,7 @@ class Algorithm1:
     @app.post("/create")
     def create_schedule(self) -> JSONResponse:
         courses = 33
-        times = 15
+        times = 51
         teachers = 29
         
         dims = {"courses":courses, "times":times, "teachers":teachers}
@@ -40,7 +40,7 @@ class Algorithm1:
     @app.post("/validate")
     def validate_schedule(self) -> JSONResponse:
         courses = 33
-        times = 15
+        times = 51
         teachers = 29
         
         dims = {"courses":courses, "times":times, "teachers":teachers}
