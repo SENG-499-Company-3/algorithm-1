@@ -12,7 +12,6 @@ jobs:
       - name: Lint Code Base
         uses: super-linter/super-linter@v4
         env:
-          VALIDATE_ALL_CODEBASE: true
           VALIDATE_DOCKERFILE_HADOLINT: true
           VALIDATE_YAML: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
