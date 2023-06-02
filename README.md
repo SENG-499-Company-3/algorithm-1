@@ -39,3 +39,9 @@ to close the container properly. Improper shut down could lead to
 performance or other kinds of issues on your computer if you have a 
 large number of containers running.
 
+
+
+
+Please check GitHub Actions to see linting warnings.
+
+[![GitHub Super-Linter](https://github.com/SENG-499-Company-3/algorithm-1/actions/workflows/gh-super-linter.yml/badge.svg)](https://github.com/marketplace/actions/super-linter)
