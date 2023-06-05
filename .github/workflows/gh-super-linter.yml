@@ -2,7 +2,7 @@ name: Lint Code Base (GH SuperLinter)
 on: [push, pull_request]
 jobs:
   build:
-    name: Lint whole code base
+    name: Lint Code
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -12,7 +12,5 @@ jobs:
       - name: Lint Code Base
         uses: super-linter/super-linter@v4
         env:
-          VALIDATE_DOCKERFILE_HADOLINT: true
-          VALIDATE_YAML: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: echo "This job's status is ${{ job.status }}."
