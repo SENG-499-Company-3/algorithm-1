@@ -1,5 +1,5 @@
 # Algorithm-1
-To create the container in Windows (Powershell), MacOS (intel zsh) 
+To create the container in Windows (Powershell), macOS (intel zsh) 
   and Linux (Bash):
 
 ```
