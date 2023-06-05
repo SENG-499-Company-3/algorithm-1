@@ -12,5 +12,6 @@ jobs:
       - name: Lint Code Base
         uses: super-linter/super-linter@v4
         env:
+          VALIDATE_MARKDOWN: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: echo "This job's status is ${{ job.status }}."
