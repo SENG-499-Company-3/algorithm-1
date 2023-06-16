@@ -42,7 +42,7 @@ app = FastAPI(
 @serve.deployment(route_prefix="/")
 @serve.ingress(app)
 class Algorithm1:
-    @app.get(
+    @app.post(
         '/schedule/create',
         response_model=Schedule,
         responses={'400': {'model': Error}},
@@ -71,7 +71,7 @@ class Algorithm1:
         return {"assignments" : list(hg.sparse())}
 
 
-    @app.get(
+    @app.post(
         '/schedule/validate',
         response_model=IsValidSchedule,
         responses={'400': {'model': Error}},
