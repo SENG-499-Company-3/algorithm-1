@@ -1,2 +1,3 @@
 matplotlib
 gym
+fastapi-code-generator
