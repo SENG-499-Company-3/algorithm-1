@@ -13,11 +13,9 @@ from hypergraph import HyperGraph
 from lib import preprocess
 
 from models import (
-    Error,
     InputData,
     IsValidSchedule,
     Schedule,
-    Success,
 )
 
 app = FastAPI(

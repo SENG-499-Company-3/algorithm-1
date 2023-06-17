@@ -17,16 +17,6 @@ class Schedule(BaseModel):
     complete: bool = None
 
 
-class Error(BaseModel):
-    message: str = Field(..., description='Error message')
-    errors: Error
-
-
-class Success(BaseModel):
-    success: bool = Field(..., description='Success')
-    message: str = Field(..., description='Success message')
-
-
 class InputDataRooms(BaseModel):
     location: Optional[str] = None
     capacity: Optional[int] = None
