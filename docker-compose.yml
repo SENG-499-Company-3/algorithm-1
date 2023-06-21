@@ -1,10 +1,23 @@
-services:
-  api:
-    image: rayproject/ray
+services:  
+  deploy:
+    build: 
+      context: ./api/
+      dockerfile: Dockerfile.dev
 
     ports: 
-      - "8000"
-    
+      - "6379:6379"
+      - "8000:8000" 
+      - "8265:8265"    
+  
     volumes:
       - .:/app
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+      interval: 1m00s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
