@@ -27,6 +27,7 @@ app = FastAPI(
     ],
 )
 
+#'''
 @app.post(
     "/schedule/create",
     response_model=Schedule,
@@ -52,8 +53,15 @@ def create_schedule(body: InputData = None) -> Union[Schedule, Error]:
 
     hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
     hg.solve()
-
-    return {"assignments": list(hg.sparse())}
+    
+    assignments = []
+    for key, _ in hg.sparse().items():
+        assignments.append([num.item() for num in key])
+        
+    return {
+        "assignments": list(assignments),
+        "valid" : hg.is_valid_schedule()
+    }
 
 @app.post(
     "/schedule/validate",
@@ -82,7 +90,7 @@ def validate_schedule(body: Schedule = None) -> Union[IsValidSchedule, Error]:
     hg.solve()
 
     return {"valid": hg.is_valid_schedule()}
-
+#'''
 
 '''
 @serve.deployment(route_prefix="/")
