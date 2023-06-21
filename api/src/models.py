@@ -1,10 +1,6 @@
 from __future__ import annotations
-from datetime import date, time
-from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel, EmailStr, Field, SecretStr
-
-
+from pydantic import BaseModel
 
 
 class IsValidSchedule(BaseModel):

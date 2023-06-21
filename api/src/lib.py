@@ -1,15 +1,8 @@
 import numpy as np
 
 
-val_map = {
-    0 : 0,
-    20 : 1,
-    39 : 2,
-    40 : 3,
-    78 : 4,
-    100 : 5,
-    195 : 6
-}
+val_map = {0 : 0, 20 : 1, 39 : 2, 40 : 3, 78 : 4, 100 : 5, 195 : 6}
+
 
 def preprocess(fname="prefs.csv"):
     prefs = np.loadtxt(fname, delimiter=",", dtype=np.uint64)
