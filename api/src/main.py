@@ -45,7 +45,7 @@ def create_schedule(body: InputData = None) -> Union[Schedule, Error]:
     dims = {"courses": courses, "times": times, "teachers": teachers}
 
     # prefs = np.random.randint(7, size=(teachers, times, courses), dtype=np.uint64)
-    prefs = preprocess()
+    prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
     loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
     max_iter = 2500
     P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
@@ -80,7 +80,7 @@ def validate_schedule(body: Schedule = None) -> Union[IsValidSchedule, Error]:
     dims = {"courses": courses, "times": times, "teachers": teachers}
 
     # prefs = np.random.randint(7, size=(teachers, times, courses), dtype=np.uint64)
-    prefs = preprocess()
+    prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
     loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
     max_iter = 2500
     P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
