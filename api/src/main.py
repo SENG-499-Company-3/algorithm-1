@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from hypergraph import HyperGraph
 from lib import preprocess
 from models import Success, Error, InputData, IsValidSchedule, Schedule
-from ray import serve
+#from ray import serve
 
 
 app = FastAPI(
@@ -27,7 +27,64 @@ app = FastAPI(
     ],
 )
 
+@app.post(
+    "/schedule/create",
+    response_model=Schedule,
+    responses={"400": {"model": Error}},
+    tags=["algorithm1"],
+)
+def create_schedule(body: InputData = None) -> Union[Schedule, Error]:
+    """
+    Algorithm 1 endpoint to generate a schedule
+    """
+    courses = 33
+    times = 51
+    teachers = 29
 
+    dims = {"courses": courses, "times": times, "teachers": teachers}
+
+    # prefs = np.random.randint(7, size=(teachers, times, courses), dtype=np.uint64)
+    prefs = preprocess()
+    loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
+    max_iter = 2500
+    P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
+    p_tgt = 3
+
+    hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
+    hg.solve()
+
+    return {"assignments": list(hg.sparse())}
+
+@app.post(
+    "/schedule/validate",
+    response_model=IsValidSchedule,
+    responses={"400": {"model": Error}},
+    tags=["algorithm1"],
+)
+def validate_schedule(body: Schedule = None) -> Union[IsValidSchedule, Error]:
+    """
+    Algorithm 1 endpoint to validate an existing schedule
+    """
+    courses = 33
+    times = 51
+    teachers = 29
+
+    dims = {"courses": courses, "times": times, "teachers": teachers}
+
+    # prefs = np.random.randint(7, size=(teachers, times, courses), dtype=np.uint64)
+    prefs = preprocess()
+    loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
+    max_iter = 2500
+    P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
+    p_tgt = 3
+
+    hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
+    hg.solve()
+
+    return {"valid": hg.is_valid_schedule()}
+
+
+'''
 @serve.deployment(route_prefix="/")
 @serve.ingress(app)
 class Algorithm1:
@@ -89,3 +146,4 @@ class Algorithm1:
 
 
 deployment_graph = Algorithm1.bind()
+'''
