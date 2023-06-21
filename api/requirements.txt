@@ -1,3 +1,5 @@
 matplotlib
 gym
+uvicorn
+fastapi
 fastapi-code-generator
