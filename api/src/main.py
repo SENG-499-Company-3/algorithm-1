@@ -5,8 +5,9 @@ import numpy as np
 from fastapi import FastAPI
 from hypergraph import HyperGraph
 from lib import preprocess
-from models import InputData, IsValidSchedule, Schedule
+from models import Success, Error, InputData, IsValidSchedule, Schedule
 from ray import serve
+
 
 app = FastAPI(
     title="SENG 499 API",

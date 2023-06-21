@@ -5,6 +5,16 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
+class Error(BaseModel):
+    message: str = Field(..., description='Error message')
+    errors: Error
+
+
+class Success(BaseModel):
+    success: bool = Field(..., description='Success')
+    message: str = Field(..., description='Success message')
+
+
 class IsValidSchedule(BaseModel):
     valid: bool
 
