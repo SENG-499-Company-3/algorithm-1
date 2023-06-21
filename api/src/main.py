@@ -1,17 +1,12 @@
 from __future__ import annotations
 
-import numpy as np
-from ray import serve
-from fastapi import FastAPI
 from typing import Union
+import numpy as np
+from fastapi import FastAPI
 from hypergraph import HyperGraph
 from lib import preprocess
-
-from models import (
-    InputData,
-    IsValidSchedule,
-    Schedule,
-)
+from models import InputData, IsValidSchedule, Schedule
+from ray import serve
 
 app = FastAPI(
     title="SENG 499 API",
@@ -77,7 +72,7 @@ class Algorithm1:
         times = 51
         teachers = 29
 
-        dims = {"courses": courses, "times": times, "teachers": teachers} 
+        dims = {"courses": courses, "times": times, "teachers": teachers}
 
         # prefs = np.random.randint(7, size=(teachers, times, courses), dtype=np.uint64)
         prefs = preprocess()
@@ -89,7 +84,7 @@ class Algorithm1:
         hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
         hg.solve()
 
-        return {"valid" : hg.is_valid_schedule()}
+        return {"valid": hg.is_valid_schedule()}
 
 
 deployment_graph = Algorithm1.bind()

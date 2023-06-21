@@ -1,15 +1,14 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-
 MIN_TEACHERS_PER_COURSE = 0
 MAX_TEACHERS_PER_COURSE = 1
 
 
 class HyperGraph:
     def __init__(
-            self, dims, prefs, loads, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3
-        ):
+        self, dims, prefs, loads, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3
+    ):
         assert "courses" in dims and "times" in dims and "teachers" in dims
         self.dtype = np.uint8
         self.dims = dims
@@ -75,7 +74,7 @@ class HyperGraph:
         courses, times, teachers = tensor.nonzero()
         assert courses.size == times.size == teachers.size
         sparse_tensor = {
-            (courses[i], times[i], teachers[i]) : self.prefs[teachers[i], courses[i]]
+            (courses[i], times[i], teachers[i]): self.prefs[teachers[i], courses[i]]
             for i in range(courses.size)
         }
         return sparse_tensor
@@ -171,12 +170,7 @@ class HyperGraph:
         ):
             return False
 
-        if (
-            num_courses_per_teacher[
-                num_courses_per_teacher > self.loads
-            ].size
-            > 0
-        ):
+        if num_courses_per_teacher[num_courses_per_teacher > self.loads].size > 0:
             return False
 
         return True
