@@ -1,5 +1,5 @@
 services:  
-  deploy:
+  web:
     build: 
       context: ./api/
       dockerfile: Dockerfile.dev
@@ -11,6 +11,10 @@ services:
   
     volumes:
       - .:/app
+  
+    networks:
+      customnetwork:
+        ipv4_address: 172.20.0.10
 
     restart: unless-stopped
 
@@ -20,4 +24,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+
+networks:
+  customnetwork:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 

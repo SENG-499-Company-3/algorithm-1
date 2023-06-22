@@ -1,0 +1,11 @@
+import_path: main:deployment_graph
+
+runtime_env: {}
+
+host: 172.20.0.10
+
+port: 8000
+
+deployments:
+  - name: Algorithm1
+    num_replicas: 2
