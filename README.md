@@ -1,20 +1,12 @@
 # Algorithm-1
 To create the container in Windows (Powershell), macOS (intel zsh) 
-  and Linux (Bash):
+  and Linux (Bash) - DEPLOYMENT:
 
 ```shell
   docker compose up
 ```
-  
-  
 
-To run the container: 
-```shell
-  docker compose run api
-```
-
-
-To create a virtual environment and download the necessary packages inside:
+To create a virtual environment and download the necessary packages inside - LOCAL TESTING:
 ```shell
   conda create --name algo1 python=3.10
   conda activate algo1
@@ -22,7 +14,7 @@ To create a virtual environment and download the necessary packages inside:
 ```
 
 
-To create an apptainer container on a DRAC cluster:
+To create an apptainer container on a DRAC cluster - TRAINING:
 ```shell
   cd ~/scratch
   salloc --mem-per-cpu=2000 --cpus-per-task=4 --time=2:0:0
