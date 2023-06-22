@@ -5,17 +5,8 @@ services:
       dockerfile: Dockerfile.dev
 
     ports: 
-      - "6379:6379"
       - "8000:8000" 
-      - "8265:8265"    
   
-    volumes:
-      - .:/app
-  
-    networks:
-      customnetwork:
-        ipv4_address: 172.20.0.10
-
     restart: unless-stopped
 
     healthcheck:
@@ -24,10 +15,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-
-networks:
-  customnetwork:
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
