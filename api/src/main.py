@@ -1,7 +1,7 @@
 from __future__ import annotations
 from hypergraph import HyperGraph
 import numpy as np
-from lib import distributed_search, batch_search, random_search
+from lib import distributed_batch_search, distributed_sequential_search, batch_search, sequential_search
 from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
@@ -36,7 +36,7 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
-    result = distributed_search(input_data)
+    result = sequential_search(input_data)
     
     if result is None:
         return Schedule(

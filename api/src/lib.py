@@ -14,7 +14,7 @@ def preprocess(fname: str = "prefs.csv") -> np.ndarray:
             prefs[i, j] = val_map[prefs[i, j]]
     return prefs
 
-def random_search(input_data: InputData = None) -> Union[HyperGraph, None]:
+def sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
     courses = 33
     times = 51
     teachers = 29
@@ -82,8 +82,7 @@ def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
         
     return None
 
-
-def distributed_search(input_data: InputData = None) -> Union[HyperGraph, None]:
+def distributed_sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
     courses = 33
     times = 51
     teachers = 29
@@ -91,7 +90,51 @@ def distributed_search(input_data: InputData = None) -> Union[HyperGraph, None]:
     dims = {"courses": courses, "times": times, "teachers": teachers}
 
     prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
-    #prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
+    loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
+    max_iter = 2500
+    P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
+    p_tgt = 3
+    num_workers = 4
+    batch_size = 5
+    
+    try:
+        mp.set_start_method("spawn", force=True)
+    
+    except RuntimeError:
+        pass
+
+    with mp.get_context("spawn").Pool() as mp_pool:
+        hg_type = type(HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)) 
+        ret_types = []
+        max_runtime = 60
+        start_time = time.time()
+        while hg_type not in ret_types and (time.time() - start_time) < max_runtime:
+            hg_pool = [
+                [HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)]
+                for i in range(num_workers)
+            ]
+            res = mp_pool.map(async_solve, hg_pool)
+            ret_types = [type(graph) for graph in res]
+    
+    valid_schedules = [
+        schd for schd in res if isinstance(schd, hg_type)
+    ] 
+    
+    if len(valid_schedules) > 0:
+        valid_schedules.sort(key = lambda hg: hg.calc_reward())
+        return valid_schedules[0]
+    
+    return None
+
+
+def distributed_batch_search(input_data: InputData = None) -> Union[HyperGraph, None]:
+    courses = 33
+    times = 51
+    teachers = 29
+
+    dims = {"courses": courses, "times": times, "teachers": teachers}
+
+    prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
     loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
     max_iter = 2500
     P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
