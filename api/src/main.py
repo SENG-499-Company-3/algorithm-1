@@ -1,7 +1,7 @@
 from __future__ import annotations
 from hypergraph import HyperGraph
 import numpy as np
-from lib import distributed_search
+from lib import distributed_search, batch_search, random_search
 from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
@@ -36,20 +36,24 @@ def create_schedule(body: InputData = None) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
-    result = distributed_search(body)
+    print(body.dimensions)
+    result = batch_search(body)
+    
     if result == None:
         return Schedule(
             assignments = [],
             valid = False,
             complete = False
         )
+
     fastapi_type_compatible_assignments = []
     for key, _ in result.sparse().items():
         fastapi_type_compatible_assignments.append([num.item() for num in key])
         
     return Schedule(
         assignments = fastapi_type_compatible_assignments, 
-        valid = result.is_valid_schedule()
+        valid = result.is_valid_schedule(),
+        complete = result.is_complete()
     )
 
 @app.post(

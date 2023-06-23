@@ -102,12 +102,24 @@ class HyperGraph:
         assert courses.size == teachers.size
         tc_pairs = [(teachers[i], courses[i]) for i in range(courses.size)]
         p_hat = np.array(
-            [self.prefs[tc_pair] for tc_pair in tc_pairs], dtype=self.dtype
+            [self.prefs[tc_pair] for tc_pair in tc_pairs], 
+            dtype=self.dtype
         )
 
         R = np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
 
         return R
+
+    def is_complete(self, tensor=None):
+        if tensor is None:
+            tensor = self.tensor
+        
+        card_c, _, _ = tensor.shape
+
+        if len(self.sparse().items()) < card_c:
+            return False
+        
+        return True
 
     def is_valid_schedule(self, tensor=None):
         if tensor is None:
