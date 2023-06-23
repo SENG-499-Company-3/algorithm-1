@@ -32,14 +32,13 @@ app = FastAPI(
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def create_schedule(body: InputData = None) -> Union[Schedule, Error]:
+def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
-    print(body.dimensions)
-    result = batch_search(body)
+    result = distributed_search(input_data)
     
-    if result == None:
+    if result is None:
         return Schedule(
             assignments = [],
             valid = False,

@@ -1,0 +1,573 @@
+---
+openapi: 3.0.1
+info:
+  title: SENG 499 API
+  description: This is SENG 499 Company 3 API
+  contact:
+    name: Kjartan Einarsson
+    url: https://github.com/orgs/SENG-499-Company-3/projects/1/views/1
+    email: kjartanreinarsson@gmail.com
+  version: 1.0.2
+servers:
+- url: https://virtserver.swaggerhub.com/seng_499_api/BackendApi/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: http://localhost:3001
+  description: Local server
+tags:
+- name: admin
+  description: Secured Admin-only calls
+- name: frontend
+  description: Operations available to frontend
+- name: algorithm1
+  description: Operations available to algorithm1
+- name: algorithm2
+  description: Operations available to algorithm2
+paths:
+  /user/create:
+    post:
+      tags:
+      - admin
+      summary: create endpoint for admin to create user
+      description: |
+        By passing in the appropriate user object, you can create new user
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        "200":
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "400":
+          description: user create failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /user/login:
+    post:
+      tags:
+      - frontend
+      summary: login endpoint for user
+      description: |
+        By passing in the appropriate log creds, you can log into the application
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userLogin'
+      responses:
+        "200":
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jwt'
+        "400":
+          description: user login failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /user/self:
+    get:
+      tags:
+      - frontend
+      summary: self endpoint for user to re-auth
+      description: |
+        Self endpoint for Frontend to re-authenicate user
+      operationId: selfUser
+      parameters:
+      - name: jwt
+        in: query
+        description: User JWT to re-authenicate
+        required: true
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/jwt'
+      responses:
+        "200":
+          description: User is authenicated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "400":
+          description: user jwt re-auth failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /teacher/preference:
+    post:
+      tags:
+      - frontend
+      summary: form endpoint for teacher preference availability
+      description: |
+        form endpoint for teacher preference availability
+      operationId: teacherPref
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/coursePreference'
+      responses:
+        "200":
+          description: User is authenicated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/success'
+        "400":
+          description: user jwt re-auth failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /schedule/create:
+    post:
+      tags:
+      - algorithm1
+      summary: algorithm 1 endpoint to generate a schedule
+      description: |
+        Algorithm 1 endpoint to generate a schedule
+      operationId: createSchedule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputData'
+      responses:
+        "200":
+          description: schedule generation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schedule'
+        "400":
+          description: schedule generation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /schedule/validate:
+    post:
+      tags:
+      - algorithm1
+      summary: algorithm 1 endpoint to validate an existing schedule
+      description: |
+        Algorithm 1 endpoint to validate a schedule
+      operationId: validateSchedule
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/schedule'
+      responses:
+        "200":
+          description: schedule validation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/isValidSchedule'
+        "400":
+          description: schedule validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /schedule/predict_class_sizes:
+    post:
+      tags:
+      - algorithm2
+      summary: predict class Sizes
+      description: |
+        Endpoint for predicting class sizes
+      operationId: schedulePredictClassSize
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/class_size_prediction'
+      responses:
+        "200":
+          description: Class size is predicted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/predicted_class_size'
+        "400":
+          description: unable to predict class size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+components:
+  schemas:
+    jwt:
+      required:
+      - jwt
+      type: object
+      properties:
+        jwt:
+          type: string
+          description: Json Web Token
+    userLogin:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@email.com
+        password:
+          type: string
+          description: password hashed in db
+          format: password
+          example: password
+    user:
+      allOf:
+      - $ref: '#/components/schemas/userLogin'
+      - required:
+        - name
+        - userRole
+        type: object
+        properties:
+          name:
+            type: string
+            example: User name
+          userRole:
+            $ref: '#/components/schemas/userRole'
+    meetingTime:
+      required:
+      - days
+      - endTime
+      - startTime
+      type: object
+      properties:
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/days'
+        startTime:
+          type: string
+          format: time
+          example: 08:00
+        endTime:
+          type: string
+          format: time
+          example: 09:00
+    courseId:
+      required:
+      - code
+      - subject
+      - term
+      type: object
+      properties:
+        subject:
+          type: string
+          description: "Course subject, e.g. SENG, CSC"
+        code:
+          type: string
+          description: "Course code, e.g. 499,310"
+        term:
+          $ref: '#/components/schemas/term'
+    coursePreference:
+      required:
+      - courseId
+      - preference
+      type: object
+      properties:
+        courseId:
+          $ref: '#/components/schemas/courseId'
+        preference:
+          type: number
+          description: Preference Value
+    courseSection:
+      required:
+      - capacity
+      - courseId
+      - endDate
+      - hoursPerWeek
+      - meetingTimes
+      - professors
+      - startDate
+      type: object
+      properties:
+        courseId:
+          $ref: '#/components/schemas/courseId'
+        hoursPerWeek:
+          type: number
+          description: Hours per week course is offered
+        capacity:
+          type: number
+          description: Capacity of course
+        professors:
+          type: array
+          description: Professor teaching course
+          items:
+            $ref: '#/components/schemas/user'
+        startDate:
+          type: string
+          description: Start date of course
+          format: date
+        endDate:
+          type: string
+          description: End date of course
+          format: date
+        meetingTimes:
+          $ref: '#/components/schemas/meetingTime'
+    teacherPreferenceForm:
+      required:
+      - courses
+      - peng
+      - userId
+      type: object
+      properties:
+        peng:
+          type: boolean
+          description: Professional Engineer certified
+        userId:
+          $ref: '#/components/schemas/user'
+        courses:
+          $ref: '#/components/schemas/courseId'
+    isValidSchedule:
+      type: boolean
+    schedule:
+      required:
+      - assignments
+      - complete
+      type: object
+      properties:
+        assignments:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+        valid:
+          type: boolean
+          nullable: true
+        complete:
+          type: boolean
+          nullable: true
+    InputData:
+      type: object
+      properties:
+        rooms:
+          $ref: '#/components/schemas/InputData_rooms'
+        timeslots:
+          $ref: '#/components/schemas/InputData_timeslots'
+        courses:
+          $ref: '#/components/schemas/InputData_courses'
+        professors:
+          $ref: '#/components/schemas/InputData_professors'
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/InputData_dimensions'
+        preferences:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+        loads:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+        availabilities:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+        p_tgt:
+          type: integer
+    class_size_prediction:
+      type: array
+      items:
+        $ref: '#/components/schemas/class_size_prediction_inner'
+    predicted_class_size:
+      type: array
+      items:
+        $ref: '#/components/schemas/predicted_class_size_inner'
+    userRole:
+      type: string
+      description: User roles
+      enum:
+      - ADMIN
+      - TEACHER
+    term:
+      type: string
+      description: Term course is offered in
+      enum:
+      - FALL
+      - SPRING
+      - SUMMER
+    days:
+      type: string
+      description: Days course is offered on
+      enum:
+      - MONDAY
+      - TUESDAY
+      - WEDNESDAY
+      - THURSDAY
+      - FRIDAY
+    error:
+      required:
+      - errors
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        errors:
+          $ref: '#/components/schemas/error'
+    success:
+      required:
+      - message
+      - success
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Success
+        message:
+          type: string
+          description: Success message
+    InputData_rooms:
+      type: object
+      properties:
+        location:
+          type: string
+        capacity:
+          type: integer
+        equipment:
+          type: array
+          items:
+            type: string
+    InputData_timeslots:
+      type: object
+      properties:
+        day:
+          type: array
+          items:
+            type: string
+        length:
+          type: integer
+        startTime:
+          type: integer
+    InputData_courses:
+      type: object
+      properties:
+        coursename:
+          type: string
+        noScheduleOverlap:
+          type: array
+          items:
+            type: string
+        lecturesNumber:
+          type: integer
+        labsNumber:
+          type: integer
+        tutorialsNumber:
+          type: integer
+        capacity:
+          type: integer
+    InputData_professors:
+      type: object
+      properties:
+        name:
+          type: string
+        courses:
+          type: array
+          items:
+            type: string
+        timePreferences:
+          type: array
+          items:
+            type: string
+        coursePreferences:
+          type: array
+          items:
+            type: string
+        dayPreferences:
+          type: array
+          items:
+            type: string
+        equipmentPreferences:
+          type: array
+          items:
+            type: string
+    InputData_dimensions:
+      type: object
+      properties:
+        courses:
+          type: integer
+        times:
+          type: integer
+        teachers:
+          type: integer
+        rooms:
+          type: integer
+    class_size_prediction_inner:
+      required:
+      - coreq
+      - course
+      - pastEnrol
+      - prereq
+      type: object
+      properties:
+        course:
+          type: string
+        prereq:
+          type: array
+          nullable: true
+          items:
+            type: string
+        coreq:
+          type: array
+          nullable: true
+          items:
+            type: string
+        pastEnrol:
+          type: array
+          items:
+            required:
+            - size
+            - term
+            - year
+            type: object
+            properties:
+              year:
+                type: integer
+              term:
+                type: integer
+              size:
+                type: integer
+    predicted_class_size_inner:
+      type: object
+      properties:
+        course:
+          type: string
+        size:
+          type: integer
+        constraints:
+          type: array
+          items:
+            type: string
+        term:
+          type: integer

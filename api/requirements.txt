@@ -1,4 +1,3 @@
 matplotlib
 uvicorn
 fastapi
-fastapi-code-generator

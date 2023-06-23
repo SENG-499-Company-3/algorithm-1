@@ -1,7 +1,7 @@
 import time
 import multiprocessing as mp
 import numpy as np
-from typing import Union
+from typing import Union, List
 from hypergraph import HyperGraph
 from models import InputData
 
@@ -14,7 +14,7 @@ def preprocess(fname: str = "prefs.csv") -> np.ndarray:
             prefs[i, j] = val_map[prefs[i, j]]
     return prefs
 
-def random_search(req_body: InputData = None) -> Union[HyperGraph, None]:
+def random_search(input_data: InputData = None) -> Union[HyperGraph, None]:
     courses = 33
     times = 51
     teachers = 29
@@ -38,18 +38,18 @@ def random_search(req_body: InputData = None) -> Union[HyperGraph, None]:
     return None
 
 
-def batch_search(req_body: InputData = None) -> Union[HyperGraph, None]:
+def batch_search(input_data: InputData = None) -> Union[HyperGraph, None]:
     courses = 33
     times = 51
     teachers = 29
 
-    dims = {"courses": req_body.dimensions.courses, "times": req_body.dimensions.times, "teachers": req_body.dimensions.teachers}
+    dims = {"courses": courses, "times": times, "teachers": teachers}
 
     prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
     loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
     max_iter = 2500
     P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
-    p_tgt = InputData.p_tgt
+    p_tgt = 4
 
     timeout = 60
     batch_size = 5 
@@ -70,14 +70,20 @@ def batch_search(req_body: InputData = None) -> Union[HyperGraph, None]:
     return None
    
 
-def async_solve(hg: HyperGraph) -> Union[HyperGraph, None]:
-    hg.solve()
-    if hg.is_valid_schedule():
-        return hg
+def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
+    for hg in hypergraphs:
+        hg.solve()
+    
+    hypergraphs.sort(key = lambda hg: hg.calc_reward())
+    
+    for hg in hypergraphs:
+        if hg.is_valid_schedule():
+            return hg
+        
     return None
 
 
-def distributed_search(req_body: InputData = None) -> Union[HyperGraph, None]:
+def distributed_search(input_data: InputData = None) -> Union[HyperGraph, None]:
     courses = 33
     times = 51
     teachers = 29
@@ -90,7 +96,8 @@ def distributed_search(req_body: InputData = None) -> Union[HyperGraph, None]:
     max_iter = 2500
     P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
     p_tgt = 3
-    num_workers = 8
+    num_workers = 4
+    batch_size = 5
     
     try:
         mp.set_start_method("spawn", force=True)
@@ -105,10 +112,10 @@ def distributed_search(req_body: InputData = None) -> Union[HyperGraph, None]:
         start_time = time.time()
         while hg_type not in ret_types and (time.time() - start_time) < max_runtime:
             hg_pool = [
-                HyperGraph(dims, prefs, loads, max_iter, P, p_tgt) 
+                [HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)] * batch_size 
                 for i in range(num_workers)
             ]
-            res = mp_pool.map(async_solve, req_body)
+            res = mp_pool.map(async_solve, hg_pool)
             ret_types = [type(graph) for graph in res]
     
     valid_schedules = [
