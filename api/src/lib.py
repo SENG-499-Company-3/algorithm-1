@@ -21,20 +21,22 @@ def sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
 
     dims = {"courses": courses, "times": times, "teachers": teachers}
 
-    prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
+    #prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
+    prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
     loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
-    max_iter = 2500
+    max_iter = 1000
     P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
     p_tgt = 3
 
     timeout = 60
 
-    start_time = time.time()
+    hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
+    start_time = time.time() 
     while (start_time - time.time()) < timeout:
-        hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
         hg.solve()
         if hg.is_valid_schedule():
             return hg
+
     return None
 
 

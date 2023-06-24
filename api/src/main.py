@@ -82,5 +82,5 @@ def validate_schedule(body: Schedule = None) -> Union[IsValidSchedule, Error]:
     hg.solve()
 
     return IsValidSchedule(
-            valid = hg.is_valid_schedule()
+        valid = hg.is_valid_schedule()
     )
