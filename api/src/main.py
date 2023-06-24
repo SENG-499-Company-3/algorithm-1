@@ -73,10 +73,8 @@ def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error
     
     match result:
         case None:
-            return Schedule(
-                assignments = [],
-                valid = False,
-                complete = False
+            return IsValidSchedule(
+                valid = False
             )
         
         case HyperGraph(): 
