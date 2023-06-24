@@ -1,17 +1,12 @@
 services:  
-  deploy:
+  web:
     build: 
       context: ./api/
       dockerfile: Dockerfile.dev
 
     ports: 
-      - "6379:6379"
       - "8000:8000" 
-      - "8265:8265"    
   
-    volumes:
-      - .:/app
-
     restart: unless-stopped
 
     healthcheck:
@@ -20,4 +15,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-

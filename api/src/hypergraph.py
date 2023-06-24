@@ -6,9 +6,7 @@ MAX_TEACHERS_PER_COURSE = 1
 
 
 class HyperGraph:
-    def __init__(
-        self, dims, prefs, loads, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3
-    ):
+    def __init__(self, dims, prefs, loads, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3):
         assert "courses" in dims and "times" in dims and "teachers" in dims
         self.dtype = np.uint8
         self.dims = dims
@@ -102,12 +100,24 @@ class HyperGraph:
         assert courses.size == teachers.size
         tc_pairs = [(teachers[i], courses[i]) for i in range(courses.size)]
         p_hat = np.array(
-            [self.prefs[tc_pair] for tc_pair in tc_pairs], dtype=self.dtype
+            [self.prefs[tc_pair] for tc_pair in tc_pairs], 
+            dtype=self.dtype
         )
 
         R = np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
 
         return R
+
+    def is_complete(self, tensor=None):
+        if tensor is None:
+            tensor = self.tensor
+        
+        card_c, _, _ = tensor.shape
+
+        if len(self.sparse().items()) < card_c:
+            return False
+        
+        return True
 
     def is_valid_schedule(self, tensor=None):
         if tensor is None:
@@ -154,20 +164,10 @@ class HyperGraph:
         num_courses_per_teacher = np.count_nonzero(proj, axis=1)
         num_teachers_per_course = np.count_nonzero(proj, axis=0)
 
-        if (
-            num_teachers_per_course[
-                num_teachers_per_course < MIN_TEACHERS_PER_COURSE
-            ].size
-            > 0
-        ):
+        if (num_teachers_per_course[num_teachers_per_course < MIN_TEACHERS_PER_COURSE].size > 0):
             return False
 
-        if (
-            num_teachers_per_course[
-                num_teachers_per_course > MAX_TEACHERS_PER_COURSE
-            ].size
-            > 0
-        ):
+        if (num_teachers_per_course[num_teachers_per_course > MAX_TEACHERS_PER_COURSE].size > 0):
             return False
 
         if num_courses_per_teacher[num_courses_per_teacher > self.loads].size > 0:

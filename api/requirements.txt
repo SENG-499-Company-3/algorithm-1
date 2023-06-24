@@ -1,5 +1,4 @@
-matplotlib
-gym
-uvicorn
-fastapi
-fastapi-code-generator
+matplotlib==3.7.1
+uvicorn==0.22.0
+fastapi==0.98.0
+numpy==1.25.0
