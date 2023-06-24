@@ -7,17 +7,19 @@ from models import InputData
 
 
 
-TIMEOUT = 60
+TIMEOUT = 60.0
 courses = 33
 times = 51
 teachers = 29
 dims = {"courses": courses, "times": times, "teachers": teachers}
-#prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
-prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
+prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
+#prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
-max_iter = 1500
+max_iter = 1000
 P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
 p_tgt = 4
+num_workers = 4
+batch_size = 5
 
 
 
@@ -34,12 +36,10 @@ def sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
 
 
 def batch_search(input_data: InputData = None) -> Union[HyperGraph, None]:
-    batch_size = 5 
+    hypergraphs = [HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)] * batch_size
     start_time = time.time()
     
     while (start_time - time.time()) < TIMEOUT:
-        hypergraphs = [HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)] * batch_size
-
         for hg in hypergraphs:
             hg.solve()
         
@@ -65,10 +65,7 @@ def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
     return None
 
 
-def distributed_sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
-    num_workers = 4
-    batch_size = 5
-    
+def distributed_sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]: 
     try:
         mp.set_start_method("spawn", force=True)
     
@@ -100,9 +97,6 @@ def distributed_sequential_search(input_data: InputData = None) -> Union[HyperGr
 
 
 def distributed_batch_search(input_data: InputData = None) -> Union[HyperGraph, None]:
-    num_workers = 4
-    batch_size = 5
-    
     try:
         mp.set_start_method("spawn", force=True)
     

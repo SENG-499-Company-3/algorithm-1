@@ -38,7 +38,7 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
-    result = sequential_search(input_data)
+    result = distributed_sequential_search(input_data)
     
     match result:
         case None:
