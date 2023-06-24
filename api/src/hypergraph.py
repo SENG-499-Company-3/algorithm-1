@@ -6,9 +6,7 @@ MAX_TEACHERS_PER_COURSE = 1
 
 
 class HyperGraph:
-    def __init__(
-        self, dims, prefs, loads, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3
-    ):
+    def __init__(self, dims, prefs, loads, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3):
         assert "courses" in dims and "times" in dims and "teachers" in dims
         self.dtype = np.uint8
         self.dims = dims
@@ -166,20 +164,10 @@ class HyperGraph:
         num_courses_per_teacher = np.count_nonzero(proj, axis=1)
         num_teachers_per_course = np.count_nonzero(proj, axis=0)
 
-        if (
-            num_teachers_per_course[
-                num_teachers_per_course < MIN_TEACHERS_PER_COURSE
-            ].size
-            > 0
-        ):
+        if (num_teachers_per_course[num_teachers_per_course < MIN_TEACHERS_PER_COURSE].size > 0):
             return False
 
-        if (
-            num_teachers_per_course[
-                num_teachers_per_course > MAX_TEACHERS_PER_COURSE
-            ].size
-            > 0
-        ):
+        if (num_teachers_per_course[num_teachers_per_course > MAX_TEACHERS_PER_COURSE].size > 0):
             return False
 
         if num_courses_per_teacher[num_courses_per_teacher > self.loads].size > 0:
