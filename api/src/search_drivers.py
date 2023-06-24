@@ -15,7 +15,7 @@ dims = {"courses": courses, "times": times, "teachers": teachers}
 prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
 #prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
-max_iter = 1000
+max_iter = 500
 P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
 p_tgt = 4
 num_workers = 4
