@@ -1,7 +1,7 @@
 from __future__ import annotations
 from hypergraph import HyperGraph
 import numpy as np
-from lib import distributed_batch_search, distributed_sequential_search, batch_search, sequential_search
+from lib import numpy_to_fastapi_type_conversion, distributed_batch_search, distributed_sequential_search, batch_search, sequential_search
 from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
@@ -38,22 +38,26 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     """
     result = sequential_search(input_data)
     
-    if result is None:
-        return Schedule(
-            assignments = [],
-            valid = False,
-            complete = False
-        )
-
-    fastapi_type_compatible_assignments = []
-    for key, _ in result.sparse().items():
-        fastapi_type_compatible_assignments.append([num.item() for num in key])
+    match result:
+        case None:
+            return Schedule(
+                assignments = [],
+                valid = False,
+                complete = False
+            )
         
-    return Schedule(
-        assignments = fastapi_type_compatible_assignments, 
-        valid = result.is_valid_schedule(),
-        complete = result.is_complete()
-    )
+        case HyperGraph(): 
+            return Schedule(
+                assignments = numpy_to_fastapi_type_conversion(result), 
+                valid = result.is_valid_schedule(),
+                complete = result.is_complete()
+            )
+        
+        case _:
+            return Error(
+               message = "RuhRohRaggy"
+            )
+
 
 @app.post(
     "/schedule/validate",
@@ -61,26 +65,26 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def validate_schedule(body: Schedule = None) -> Union[IsValidSchedule, Error]:
+def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error]:
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
-    courses = 33
-    times = 51
-    teachers = 29
+    result = sequential_search()
+    
+    match result:
+        case None:
+            return Schedule(
+                assignments = [],
+                valid = False,
+                complete = False
+            )
+        
+        case HyperGraph(): 
+            return IsValidSchedule(
+                valid = result.is_valid_schedule()
+            )
 
-    dims = {"courses": courses, "times": times, "teachers": teachers}
-
-    # prefs = np.random.randint(7, size=(teachers, times, courses), dtype=np.uint64)
-    prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
-    loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
-    max_iter = 2500
-    P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
-    p_tgt = 3
-
-    hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
-    hg.solve()
-
-    return IsValidSchedule(
-        valid = hg.is_valid_schedule()
-    )
+        case _:
+            return Error(
+               message = "RuhRohRaggy"
+            )
