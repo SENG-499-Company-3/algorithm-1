@@ -3,10 +3,13 @@ from matplotlib import pyplot as plt
 
 MIN_TEACHERS_PER_COURSE = 0
 MAX_TEACHERS_PER_COURSE = 1
+MIN_TIMES_PER_COURSE = 0
+MAX_TIMES_PER_COURSE = 1
+MAX_REQUIRED_COURSES_PER_TIME = 1
 
 
 class HyperGraph:
-    def __init__(self, dims, prefs, loads, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3):
+    def __init__(self, dims, prefs, loads, required_course_pivots=None, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3):
         assert "courses" in dims and "times" in dims and "teachers" in dims
         self.dtype = np.uint8
         self.dims = dims
@@ -14,6 +17,7 @@ class HyperGraph:
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
         self.prefs = prefs
         self.loads = loads
+        self.pivots = required_course_pivots
         self.iter = 0
         self.max_iter = max_iter
         self.P = P
@@ -123,40 +127,46 @@ class HyperGraph:
         if tensor is None:
             tensor = self.tensor
 
-        no_imbalanced_loads = self.check_course_loads(tensor)
-        no_time_conflicts = self.check_time_conflicts(tensor)
+        no_course_time_conflicts = self.check_course_time_constraint(tensor) 
+        no_course_teacher_conflicts = self.check_course_teacher_constraint(tensor)
 
-        if no_imbalanced_loads and no_time_conflicts:
+        if no_course_time_conflicts and no_course_teacher_conflicts:
             return True
 
         return False
 
-    def check_time_conflicts(self, tensor=None):
+    def check_course_time_constraint(self, tensor=None):
         if tensor is None:
             tensor = self.tensor
 
-        proj = self.proj_2d(("teachers", "times"), tensor)
-        teachers, times = proj.shape
+        proj = self.proj_2d(("courses", "times"), tensor)
+        num_times_per_course = np.count_nonzero(proj, axis=1)
+        num_courses_per_time = np.count_nonzero(proj, axis=0)
 
-        for teacher in range(teachers):
-            window = 2
-            time = 2
-            while time < times - 1:
-                time_window = proj[teacher, time - window : time + window + 1]
-                assignments_in_window = np.count_nonzero(time_window)
+        if num_times_per_course[num_times_per_course < MIN_TIMES_PER_COURSE].size > 0:
+            return False
 
-                if assignments_in_window > 1:
-                    return False
+        if num_times_per_course[num_times_per_course > MAX_TIMES_PER_COURSE].size > 0:
+            return False
+        
+        if self.pivots is None:
+            return True
 
-                if time == 22:
-                    time = 25
-                    window = 1
+        required_course_pivots = self.pivots 
+        start = 0
 
-                time += 1
+        for pivot in required_course_pivots:
+            stop = pivot + 1
+            required_courses = num_courses_per_time[start : stop] 
+            
+            if required_courses[required_courses > MAX_REQUIRED_COURSES_PER_TIME].size > 0:
+                return False
+            
+            start = stop
 
         return True
 
-    def check_course_loads(self, tensor=None):
+    def check_course_teacher_constraint(self, tensor=None):
         if tensor is None:
             tensor = self.tensor
 

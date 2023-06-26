@@ -9,13 +9,14 @@ from models import InputData
 
 TIMEOUT = 60.0
 courses = 33
-times = 51
+times = 15
 teachers = 29
 dims = {"courses": courses, "times": times, "teachers": teachers}
-prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
-#prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
+#prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
+prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
-max_iter = 500
+pivots = (12, 24, 33)
+max_iter = 1000
 P = np.array([0, 1, 2, 3, 4, 5, 6], dtype=np.uint64)
 p_tgt = 4
 num_workers = 4
@@ -24,7 +25,7 @@ batch_size = 5
 
 
 def sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
-    hg = HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)
+    hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)
     start_time = time.time() 
     
     while (start_time - time.time()) < TIMEOUT:
@@ -36,7 +37,7 @@ def sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
 
 
 def batch_search(input_data: InputData = None) -> Union[HyperGraph, None]:
-    hypergraphs = [HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)] * batch_size
+    hypergraphs = [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)] * batch_size
     start_time = time.time()
     
     while (start_time - time.time()) < TIMEOUT:
@@ -73,13 +74,13 @@ def distributed_sequential_search(input_data: InputData = None) -> Union[HyperGr
         pass
 
     with mp.get_context("spawn").Pool() as mp_pool:
-        hg_type = type(HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)) 
+        hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)) 
         ret_types = []
         start_time = time.time()
         
         while hg_type not in ret_types and (time.time() - start_time) < TIMEOUT:
             hg_pool = [
-                [HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)]
+                [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)]
                 for i in range(num_workers)
             ]
             res = mp_pool.map(async_solve, hg_pool)
@@ -104,13 +105,13 @@ def distributed_batch_search(input_data: InputData = None) -> Union[HyperGraph, 
         pass
 
     with mp.get_context("spawn").Pool() as mp_pool:
-        hg_type = type(HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)) 
+        hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)) 
         ret_types = []
         start_time = time.time()
         
         while hg_type not in ret_types and (time.time() - start_time) < TIMEOUT:
             hg_pool = [
-                [HyperGraph(dims, prefs, loads, max_iter, P, p_tgt)] * batch_size 
+                [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)] * batch_size 
                 for i in range(num_workers)
             ]
             res = mp_pool.map(async_solve, hg_pool)
@@ -125,4 +126,3 @@ def distributed_batch_search(input_data: InputData = None) -> Union[HyperGraph, 
         return valid_schedules[0]
     
     return None
-
