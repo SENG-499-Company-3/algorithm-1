@@ -1,11 +1,12 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import sys
 
-MIN_TEACHERS_PER_COURSE = 0
+np.set_printoptions(threshold=sys.maxsize)
 MAX_TEACHERS_PER_COURSE = 1
-MIN_TIMES_PER_COURSE = 0
 MAX_TIMES_PER_COURSE = 1
 MAX_REQUIRED_COURSES_PER_TIME = 1
+
 
 
 class HyperGraph:
@@ -30,21 +31,38 @@ class HyperGraph:
         if tensor is None:
             tensor = self.tensor
         tensor[:, :, :] = 0
-        self.random_search(tensor)
 
     def random_search(self, tensor=None):
         if tensor is None:
             tensor = self.tensor
 
         card_c, card_ti, _ = tensor.shape
+        start = 0
 
-        for course in range(card_c):
-            time = np.random.randint(low=0, high=card_ti, size=1)
-            ideal_tc_matches = np.where(self.prefs[:, course] >= self.p_tgt)[0]
-            if ideal_tc_matches.size > 0:
-                teacher = np.random.choice(ideal_tc_matches, size=1)
-                tensor[course, time, teacher] = 1
+        for pivot in self.pivots:
+            stop = pivot + 1
+            candidate_time_assignments = np.arange(0, card_ti, 1)
+            candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
 
+            if candidate_teachers.size > 0:
+                candidate_assignment_dict = {}
+                for idx in range(candidate_teachers.size):
+                    course = candidate_courses[idx]
+                    teacher = candidate_teachers[idx]
+
+                    if course not in candidate_assignment_dict:
+                        candidate_assignment_dict[course] = [teacher]
+
+                    else:
+                        candidate_assignment_dict[course].append(teacher)
+                
+                for course, candidate_teachers in candidate_assignment_dict.items():
+                    teacher = np.random.choice(candidate_teachers, size=1)
+                    time = np.random.choice(candidate_time_assignments, size=1, replace=False)
+                    tensor[course, time, teacher] = 1
+            
+            start = stop
+            
     def set_sufficient_reward(self):
         card_c, _, _ = self.shape
         self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P))
@@ -57,7 +75,8 @@ class HyperGraph:
             if self.done(max_reward):
                 break
 
-            self.reset(random_tensor)
+            random_tensor[:, :, :] = 0
+            self.random_search(random_tensor)
             reward = self.calc_reward(random_tensor)
 
             if reward > max_reward:
@@ -74,7 +93,6 @@ class HyperGraph:
             tensor = self.tensor
 
         courses, times, teachers = tensor.nonzero()
-        assert courses.size == times.size == teachers.size
         sparse_tensor = {
             (courses[i], times[i], teachers[i]): self.prefs[teachers[i], courses[i]]
             for i in range(courses.size)
@@ -101,7 +119,6 @@ class HyperGraph:
             tensor = self.tensor
 
         courses, times, teachers = tensor.nonzero()
-        assert courses.size == teachers.size
         tc_pairs = [(teachers[i], courses[i]) for i in range(courses.size)]
         p_hat = np.array(
             [self.prefs[tc_pair] for tc_pair in tc_pairs], 
@@ -143,19 +160,14 @@ class HyperGraph:
         num_times_per_course = np.count_nonzero(proj, axis=1)
         num_courses_per_time = np.count_nonzero(proj, axis=0)
 
-        if num_times_per_course[num_times_per_course < MIN_TIMES_PER_COURSE].size > 0:
-            return False
-
         if num_times_per_course[num_times_per_course > MAX_TIMES_PER_COURSE].size > 0:
             return False
         
         if self.pivots is None:
             return True
 
-        required_course_pivots = self.pivots 
         start = 0
-
-        for pivot in required_course_pivots:
+        for pivot in self.pivots:
             stop = pivot + 1
             required_courses = num_courses_per_time[start : stop] 
             
@@ -174,10 +186,7 @@ class HyperGraph:
         num_courses_per_teacher = np.count_nonzero(proj, axis=1)
         num_teachers_per_course = np.count_nonzero(proj, axis=0)
 
-        if (num_teachers_per_course[num_teachers_per_course < MIN_TEACHERS_PER_COURSE].size > 0):
-            return False
-
-        if (num_teachers_per_course[num_teachers_per_course > MAX_TEACHERS_PER_COURSE].size > 0):
+        if num_teachers_per_course[num_teachers_per_course > MAX_TEACHERS_PER_COURSE].size > 0:
             return False
 
         if num_courses_per_teacher[num_courses_per_teacher > self.loads].size > 0:
