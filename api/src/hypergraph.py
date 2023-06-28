@@ -19,14 +19,13 @@ class HyperGraph:
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
         self.prefs = prefs
         self.loads = loads
-        self.set_pivots(required_course_pivots)
         self.iter = 0
         self.max_iter = max_iter
         self.P = P
         self.p_tgt = p_tgt
         self.set_sufficient_reward()
         self.tensor = np.zeros(shape=self.shape, dtype=self.dtype)
-        self.reset()
+        self.set_pivots(required_course_pivots)
 
     def set_pivots(self, pivots):
         _, card_ti, _ = self.shape
@@ -58,31 +57,36 @@ class HyperGraph:
         for pivot in self.pivots:
             stop = pivot + 1 
 
-            candidate_time_assignments = np.arange(0, card_ti, 1)
-            candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
-
-            if candidate_teachers.size > 0:
-                candidate_assignment_dict = {}
-                for idx in range(candidate_teachers.size):
-                    course = candidate_courses[idx]
-                    teacher = candidate_teachers[idx]
-
-                    if course not in candidate_assignment_dict:
-                        candidate_assignment_dict[course] = [teacher]
-
-                    else:
-                        candidate_assignment_dict[course].append(teacher)
-                
-                for course, candidate_teachers in candidate_assignment_dict.items():
-                    teacher = np.random.choice(candidate_teachers, size=1)
-                    time = np.random.choice(candidate_time_assignments, size=1, replace=False)
-                    tensor[course, time, teacher] = 1
+            candidate_times = [i for i in range(card_ti)]
+            candidate_map = self.get_candidates(start, stop).items()
+            
+            for course, candidate_teachers in candidate_map:
+                teacher = np.random.choice(candidate_teachers, size=1)
+                time = np.random.choice(candidate_times, size=1, replace=False)
+                candidate_times.remove(time)
+                tensor[course, time, teacher] = 1
             
             start = stop
+
+    def get_candidates(self, start, stop):
+        candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
+        candidate_assignment_dict = {}
+        
+        for idx in range(candidate_teachers.size):
+            course = candidate_courses[idx]
+            teacher = candidate_teachers[idx]
             
+            if course not in candidate_assignment_dict:
+                candidate_assignment_dict[course] = [teacher]
+                
+            else:
+                candidate_assignment_dict[course].append(teacher)
+                
+        return candidate_assignment_dict
+
     def set_sufficient_reward(self):
         card_c, _, _ = self.shape
-        self.sufficient_reward = 0.7 * card_c * np.tanh(self.p_tgt - np.median(self.P))
+        self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P))
 
     def solve(self):
         reward, max_reward = 0, 0
