@@ -51,6 +51,7 @@ class HyperGraph:
         if tensor is None:
             tensor = self.tensor
         
+        teacher_loads = self.loads.copy()
         card_c, card_ti, _ = tensor.shape
         start = 0
 
@@ -58,17 +59,19 @@ class HyperGraph:
             stop = pivot + 1 
 
             candidate_times = [i for i in range(card_ti)]
-            candidate_map = self.get_candidates(start, stop).items()
+            preferred = self.get_preferred(start, stop).items()
             
-            for course, candidate_teachers in candidate_map:
+            for course, pref_teachers in preferred:
+                candidate_teachers = [teacher for teacher in pref_teachers if teacher_loads[teacher] > 0]
                 teacher = np.random.choice(candidate_teachers, size=1)
                 time = np.random.choice(candidate_times, size=1, replace=False)
+                tensor[course, time, teacher] = self.prefs[teacher, course] 
+                teacher_loads[teacher] -= 1
                 candidate_times.remove(time)
-                tensor[course, time, teacher] = 1
             
-            start = stop
+            start = stop 
 
-    def get_candidates(self, start, stop):
+    def get_preferred(self, start, stop):
         candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
         candidate_assignment_dict = {}
         
@@ -91,21 +94,16 @@ class HyperGraph:
     def solve(self):
         reward, max_reward = 0, 0
         random_tensor = np.zeros(self.shape, dtype=self.dtype)
-
+        self.random_search()
+        return
         for self.iter in range(self.max_iter):
-            if self.done(max_reward):
-                break
-
-            random_tensor[:, :, :] = 0
             self.random_search(random_tensor)
-            reward = self.calc_reward(random_tensor)
-
-            if reward > max_reward:
-                max_reward = reward
+            
+            if self.is_valid_schedule():
                 self.tensor[:, :, :] = random_tensor[:, :, :]
-
+            
     def done(self, reward):
-        if self.is_valid_schedule() and reward >= self.sufficient_reward:
+        if self.is_valid_schedule() and reward > self.sufficient_reward:
             return True
         return False
 
