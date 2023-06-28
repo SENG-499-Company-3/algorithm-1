@@ -2,7 +2,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import sys
 
-np.set_printoptions(threshold=sys.maxsize)
+
+
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1
 MAX_REQUIRED_COURSES_PER_TIME = 1
@@ -10,7 +11,7 @@ MAX_REQUIRED_COURSES_PER_TIME = 1
 
 
 class HyperGraph:
-    def __init__(self, dims, prefs, loads, required_course_pivots=None, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3):
+    def __init__(self, dims, prefs, loads, required_course_pivots, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3):
         assert "courses" in dims and "times" in dims and "teachers" in dims
         self.dtype = np.uint8
         self.dims = dims
@@ -18,7 +19,7 @@ class HyperGraph:
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
         self.prefs = prefs
         self.loads = loads
-        self.pivots = required_course_pivots
+        self.set_pivots(required_course_pivots)
         self.iter = 0
         self.max_iter = max_iter
         self.P = P
@@ -26,6 +27,21 @@ class HyperGraph:
         self.set_sufficient_reward()
         self.tensor = np.zeros(shape=self.shape, dtype=self.dtype)
         self.reset()
+
+    def set_pivots(self, pivots):
+        _, card_ti, _ = self.shape
+        sorted_pivots = np.sort(pivots)
+        start = 0
+        for pivot in sorted_pivots:
+            stop = pivot + 1
+            
+            if stop - start > card_ti:
+                return False
+
+            start = stop
+
+        self.pivots = sorted_pivots
+        return True
 
     def reset(self, tensor=None):
         if tensor is None:
@@ -35,12 +51,13 @@ class HyperGraph:
     def random_search(self, tensor=None):
         if tensor is None:
             tensor = self.tensor
-
+        
         card_c, card_ti, _ = tensor.shape
         start = 0
 
         for pivot in self.pivots:
-            stop = pivot + 1
+            stop = pivot + 1 
+
             candidate_time_assignments = np.arange(0, card_ti, 1)
             candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
 
@@ -65,7 +82,7 @@ class HyperGraph:
             
     def set_sufficient_reward(self):
         card_c, _, _ = self.shape
-        self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P))
+        self.sufficient_reward = 0.7 * card_c * np.tanh(self.p_tgt - np.median(self.P))
 
     def solve(self):
         reward, max_reward = 0, 0
@@ -163,9 +180,6 @@ class HyperGraph:
         if num_times_per_course[num_times_per_course > MAX_TIMES_PER_COURSE].size > 0:
             return False
         
-        if self.pivots is None:
-            return True
-
         start = 0
         for pivot in self.pivots:
             stop = pivot + 1
