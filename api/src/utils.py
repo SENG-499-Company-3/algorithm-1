@@ -1,5 +1,6 @@
 import numpy as np
 from typing import List
+from models import InputData, Error
 from hypergraph import HyperGraph
 
 
@@ -24,4 +25,14 @@ def numpy_to_fastapi_type_conversion(hg: HyperGraph) -> List[List[int]]:
     ]
     
     return fastapi_type_compatible_assignments 
+
+def parse_request(input_data: InputData) -> Union[Error, None]:
+    _, card_ti, _ = self.shape
+        
+    for pivot_pair in pivots:
+        assert(pivot_pair[1] > pivot_pair[0])
+
+    pivots.sort(key = lambda pivot_pair: pivot_pair[0]) 
+    for p0, p1 in pivots: 
+        assert(p1 - p0 > card_ti)
 
