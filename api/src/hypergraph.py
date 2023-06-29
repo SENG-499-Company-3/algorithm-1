@@ -1,7 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-import sys
-
+from typing import List, Tuple
 
 
 MAX_TEACHERS_PER_COURSE = 1
@@ -11,8 +10,16 @@ MAX_REQUIRED_COURSES_PER_TIME = 1
 
 
 class HyperGraph:
-    def __init__(self, dims, prefs, loads, required_course_pivots, max_iter=1000, P=np.arange(7, dtype=np.uint8), p_tgt=3):
-        assert "courses" in dims and "times" in dims and "teachers" in dims
+    def __init__(
+        self, 
+        dims: dict, 
+        prefs: np.ndarray, 
+        loads: np.ndarray,
+        required_course_pivots: List[Tuple[int, int]],
+        max_iter: int = 1000, 
+        P: np.arange = np.arange(7, dtype=np.uint8), 
+        p_tgt: int = 3
+    ):
         self.dtype = np.uint8
         self.dims = dims
         self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2}
@@ -26,8 +33,8 @@ class HyperGraph:
         self.set_sufficient_reward()
         self.tensor = np.zeros(shape=self.shape, dtype=self.dtype)
         self.set_pivots(required_course_pivots)
-
-    def set_pivots(self, pivots):
+    
+    def set_pivots(self, pivots: List[Tuple[int, int]]) -> bool:
         _, card_ti, _ = self.shape
         sorted_pivots = np.sort(pivots)
         start = 0
@@ -42,12 +49,12 @@ class HyperGraph:
         self.pivots = sorted_pivots
         return True
 
-    def reset(self, tensor=None):
+    def reset(self, tensor=None) -> None:
         if tensor is None:
             tensor = self.tensor
         tensor[:, :, :] = 0
 
-    def random_search(self, tensor=None):
+    def random_search(self, tensor=None) -> None:
         if tensor is None:
             tensor = self.tensor
         
@@ -57,7 +64,6 @@ class HyperGraph:
 
         for pivot in self.pivots:
             stop = pivot + 1 
-
             candidate_times = [i for i in range(card_ti)]
             preferred = self.get_preferred(start, stop).items()
             
@@ -71,7 +77,7 @@ class HyperGraph:
             
             start = stop 
 
-    def get_preferred(self, start, stop):
+    def get_preferred(self, start: int, stop: int) -> dict:
         candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
         candidate_assignment_dict = {}
         
@@ -87,11 +93,11 @@ class HyperGraph:
                 
         return candidate_assignment_dict
 
-    def set_sufficient_reward(self):
+    def set_sufficient_reward(self) -> None:
         card_c, _, _ = self.shape
         self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P))
 
-    def solve(self):
+    def solve(self) -> None:
         reward, max_reward = 0, 0
         random_tensor = np.zeros(self.shape, dtype=self.dtype)
         self.random_search()
@@ -102,12 +108,12 @@ class HyperGraph:
             if self.is_valid_schedule():
                 self.tensor[:, :, :] = random_tensor[:, :, :]
             
-    def done(self, reward):
+    def done(self, reward: float) -> bool:
         if self.is_valid_schedule() and reward > self.sufficient_reward:
             return True
         return False
 
-    def sparse(self, tensor=None):
+    def sparse(self, tensor=None) -> dict:
         if tensor is None:
             tensor = self.tensor
 
@@ -118,7 +124,7 @@ class HyperGraph:
         }
         return sparse_tensor
 
-    def plot(self, tensor=None):
+    def plot(self, tensor=None) -> None:
         if tensor is None:
             tensor = self.tensor
 
@@ -133,7 +139,7 @@ class HyperGraph:
         ax.scatter(courses, times, teachers, c=teachers, alpha=1)
         plt.show()
 
-    def calc_reward(self, tensor=None):
+    def calc_reward(self, tensor=None) -> float:
         if tensor is None:
             tensor = self.tensor
 
@@ -148,7 +154,7 @@ class HyperGraph:
 
         return R
 
-    def is_complete(self, tensor=None):
+    def is_complete(self, tensor=None) -> bool:
         if tensor is None:
             tensor = self.tensor
         
@@ -159,7 +165,7 @@ class HyperGraph:
         
         return True
 
-    def is_valid_schedule(self, tensor=None):
+    def is_valid_schedule(self, tensor=None) -> bool:
         if tensor is None:
             tensor = self.tensor
 
@@ -171,7 +177,7 @@ class HyperGraph:
 
         return False
 
-    def check_course_time_constraint(self, tensor=None):
+    def check_course_time_constraint(self, tensor=None) -> bool:
         if tensor is None:
             tensor = self.tensor
 
@@ -194,7 +200,7 @@ class HyperGraph:
 
         return True
 
-    def check_course_teacher_constraint(self, tensor=None):
+    def check_course_teacher_constraint(self, tensor=None) -> bool:
         if tensor is None:
             tensor = self.tensor
 
@@ -210,7 +216,7 @@ class HyperGraph:
 
         return True
 
-    def proj_2d(self, dim_keys, tensor=None):
+    def proj_2d(self, dim_keys, tensor=None) -> np.ndarray:
         assert len(dim_keys) == 2
 
         if tensor is None:
