@@ -57,7 +57,6 @@ class HyperGraph:
 
         for pivot in self.pivots:
             stop = pivot + 1 
-
             candidate_times = [i for i in range(card_ti)]
             preferred = self.get_preferred(start, stop).items()
             
