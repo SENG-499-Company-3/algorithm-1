@@ -1,12 +1,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from typing import List
+from typing import List, Tuple
 
 
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1
 MAX_REQUIRED_COURSES_PER_TIME = 1
-
 
 
 class HyperGraph:
@@ -51,95 +50,8 @@ class HyperGraph:
 
     def set_sufficient_reward(self) -> None:
         card_c, _, _ = self.shape
-        self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P))
+        self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P)) 
     
-    def get_preferred(self, start: int, stop: int) -> dict:
-        candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
-        candidate_assignment_dict = {}
-        
-        for idx in range(candidate_teachers.size):
-            course = candidate_courses[idx]
-            teacher = candidate_teachers[idx]
-            
-            if course not in candidate_assignment_dict:
-                candidate_assignment_dict[course] = [teacher]
-                
-            else:
-                candidate_assignment_dict[course].append(teacher)
-                
-        return candidate_assignment_dict
-
-    def random_search(self, tensor=None) -> None:
-        if tensor is None:
-            tensor = self.tensor
-        
-        teacher_loads = self.loads.copy()
-        card_c, card_ti, _ = tensor.shape
-        start = 0
-
-        for pivot in self.pivots:
-            stop = pivot + 1 
-            candidate_times = [i for i in range(card_ti)]
-            preferred = self.get_preferred(start, stop).items()
-            
-            for course, pref_teachers in preferred:
-                candidate_teachers = [teacher for teacher in pref_teachers if teacher_loads[teacher] > 0 and self.prefs[teacher, course] > self.p_tgt]
-                teacher = np.random.choice(candidate_teachers, size=1)
-                print(f"pref: {self.prefs[teacher, course]}\ncourse: {course}\nteacher: {teacher}\npref_teachers: {pref_teachers}\ncandidate_teachers: {candidate_teachers}\n")
-                time = np.random.choice(candidate_times, size=1, replace=False)
-                tensor[course, time, teacher] = self.prefs[teacher, course] 
-                teacher_loads[teacher] -= 1
-                candidate_times.remove(time)
-            
-            start = stop 
-
-    def solve(self) -> None:
-        reward, max_reward = 0, 0
-        random_tensor = np.zeros(self.shape, dtype=self.dtype)
-
-        for self.iter in range(self.max_iter):
-            self.random_search(random_tensor)
-            self.tensor[:, :, :] = random_tensor[:, :, :]
-            break
-            if self.is_valid_schedule():
-                self.tensor[:, :, :] = random_tensor[:, :, :]
-    
-    def reset(self, tensor=None) -> None:
-        if tensor is None:
-            tensor = self.tensor
-        tensor[:, :, :] = 0
-            
-    def done(self, reward: float) -> bool:
-        if self.is_valid_schedule() and reward > self.sufficient_reward:
-            return True
-        return False
-
-    def sparse(self, tensor=None) -> dict:
-        if tensor is None:
-            tensor = self.tensor
-
-        courses, times, teachers = tensor.nonzero()
-        sparse_tensor = {
-            (courses[i], times[i], teachers[i]): self.prefs[teachers[i], courses[i]]
-            for i in range(courses.size)
-        }
-        return sparse_tensor
-
-    def plot(self, tensor=None) -> None:
-        if tensor is None:
-            tensor = self.tensor
-
-        plt.rcParams["figure.figsize"] = [10.00, 5.00]
-        plt.rcParams["figure.autolayout"] = True
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection="3d")
-        ax.set_xlabel("$Courses$")
-        ax.set_ylabel("$Times$")
-        ax.set_zlabel("$Teachers$")
-        courses, times, teachers = tensor.nonzero()
-        ax.scatter(courses, times, teachers, c=teachers, alpha=1)
-        plt.show()
-
     def calc_reward(self, tensor=None) -> float:
         if tensor is None:
             tensor = self.tensor
@@ -154,6 +66,48 @@ class HyperGraph:
         R = np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
 
         return R
+
+    def random_search(self, tensor=None) -> None:
+        if tensor is None:
+            tensor = self.tensor
+        
+        teacher_loads = self.loads.copy()
+        card_c, card_ti, card_te = tensor.shape
+        start = 0
+
+        for pivot in self.pivots:
+            stop = pivot 
+            candidate_times = [i for i in range(card_ti)]
+             
+            for course in range(start, stop):
+                candidate_teachers = [
+                        teacher for teacher in range(card_te) 
+                        if teacher_loads[teacher] > 0 and 
+                        self.prefs[teacher, course] >= self.p_tgt
+                ]
+                if not candidate_teachers: continue
+                teacher = np.random.choice(candidate_teachers, size=1)
+                time = np.random.choice(candidate_times, size=1, replace=False)
+                tensor[course, time, teacher] = self.prefs[teacher, course] 
+                teacher_loads[teacher] -= 1
+                candidate_times.remove(time)
+            
+            start = stop 
+
+    def solve(self) -> None:
+        reward, max_reward = 0, 0
+        random_tensor = np.zeros(self.shape, dtype=self.dtype)
+
+        for self.iter in range(self.max_iter):
+            self.random_search(random_tensor)
+            reward = self.calc_reward(random_tensor)
+            
+            if reward > max_reward:
+                print("better kekw")
+                max_reward = reward
+                self.tensor[:, :, :] = random_tensor[:, :, :] 
+            
+            random_tensor[:, :, :] = 0
 
     def is_complete(self, tensor=None) -> bool:
         if tensor is None:
@@ -184,15 +138,14 @@ class HyperGraph:
 
         proj = self.proj_2d(("courses", "times"), tensor)
         num_times_per_course = np.count_nonzero(proj, axis=1)
-        num_courses_per_time = np.count_nonzero(proj, axis=0)
 
         if num_times_per_course[num_times_per_course > MAX_TIMES_PER_COURSE].size > 0:
             return False
-        
+         
         start = 0
         for pivot in self.pivots:
-            stop = pivot + 1
-            required_courses = num_courses_per_time[start : stop] 
+            stop = pivot
+            required_courses = num_times_per_course[start : stop] 
             
             if required_courses[required_courses > MAX_REQUIRED_COURSES_PER_TIME].size > 0:
                 return False
@@ -217,9 +170,7 @@ class HyperGraph:
 
         return True
 
-    def proj_2d(self, dim_keys, tensor=None) -> np.ndarray:
-        assert len(dim_keys) == 2
-
+    def proj_2d(self, dim_keys: Tuple[str, str], tensor=None) -> np.ndarray:
         if tensor is None:
             tensor = self.tensor
 
@@ -234,3 +185,30 @@ class HyperGraph:
             proj[i, j] = 1
 
         return proj
+                
+    def sparse(self, tensor=None) -> dict:
+        if tensor is None:
+            tensor = self.tensor
+
+        courses, times, teachers = tensor.nonzero()
+        sparse_tensor = {
+            (courses[i], times[i], teachers[i]): self.prefs[teachers[i], courses[i]]
+            for i in range(courses.size)
+        }
+        return sparse_tensor
+
+    def plot(self, tensor=None) -> None:
+        if tensor is None:
+            tensor = self.tensor
+
+        plt.rcParams["figure.figsize"] = [10.00, 5.00]
+        plt.rcParams["figure.autolayout"] = True
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.set_xlabel("$Courses$")
+        ax.set_ylabel("$Times$")
+        ax.set_zlabel("$Teachers$")
+        courses, times, teachers = tensor.nonzero()
+        ax.scatter(courses, times, teachers, c=teachers, alpha=1)
+        plt.show()
+
