@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from typing import List, Tuple
+from typing import List
 
 
 MAX_TEACHERS_PER_COURSE = 1
@@ -15,7 +15,7 @@ class HyperGraph:
         dims: dict, 
         prefs: np.ndarray, 
         loads: np.ndarray,
-        required_course_pivots: List[Tuple[int, int]],
+        required_course_pivots: List[int],
         max_iter: int = 1000, 
         P: np.arange = np.arange(7, dtype=np.uint8), 
         p_tgt: int = 3
@@ -34,7 +34,7 @@ class HyperGraph:
         self.tensor = np.zeros(shape=self.shape, dtype=self.dtype)
         self.set_pivots(required_course_pivots)
     
-    def set_pivots(self, pivots: List[Tuple[int, int]]) -> bool:
+    def set_pivots(self, pivots: List[int]) -> bool:
         _, card_ti, _ = self.shape
         sorted_pivots = np.sort(pivots)
         start = 0
@@ -49,34 +49,10 @@ class HyperGraph:
         self.pivots = sorted_pivots
         return True
 
-    def reset(self, tensor=None) -> None:
-        if tensor is None:
-            tensor = self.tensor
-        tensor[:, :, :] = 0
-
-    def random_search(self, tensor=None) -> None:
-        if tensor is None:
-            tensor = self.tensor
-        
-        teacher_loads = self.loads.copy()
-        card_c, card_ti, _ = tensor.shape
-        start = 0
-
-        for pivot in self.pivots:
-            stop = pivot + 1 
-            candidate_times = [i for i in range(card_ti)]
-            preferred = self.get_preferred(start, stop).items()
-            
-            for course, pref_teachers in preferred:
-                candidate_teachers = [teacher for teacher in pref_teachers if teacher_loads[teacher] > 0]
-                teacher = np.random.choice(candidate_teachers, size=1)
-                time = np.random.choice(candidate_times, size=1, replace=False)
-                tensor[course, time, teacher] = self.prefs[teacher, course] 
-                teacher_loads[teacher] -= 1
-                candidate_times.remove(time)
-            
-            start = stop 
-
+    def set_sufficient_reward(self) -> None:
+        card_c, _, _ = self.shape
+        self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P))
+    
     def get_preferred(self, start: int, stop: int) -> dict:
         candidate_teachers, candidate_courses = np.where(self.prefs[:, start : stop] >= self.p_tgt)
         candidate_assignment_dict = {}
@@ -93,20 +69,45 @@ class HyperGraph:
                 
         return candidate_assignment_dict
 
-    def set_sufficient_reward(self) -> None:
-        card_c, _, _ = self.shape
-        self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P))
+    def random_search(self, tensor=None) -> None:
+        if tensor is None:
+            tensor = self.tensor
+        
+        teacher_loads = self.loads.copy()
+        card_c, card_ti, _ = tensor.shape
+        start = 0
+
+        for pivot in self.pivots:
+            stop = pivot + 1 
+            candidate_times = [i for i in range(card_ti)]
+            preferred = self.get_preferred(start, stop).items()
+            
+            for course, pref_teachers in preferred:
+                candidate_teachers = [teacher for teacher in pref_teachers if teacher_loads[teacher] > 0 and self.prefs[teacher, course] > self.p_tgt]
+                teacher = np.random.choice(candidate_teachers, size=1)
+                print(f"pref: {self.prefs[teacher, course]}\ncourse: {course}\nteacher: {teacher}\npref_teachers: {pref_teachers}\ncandidate_teachers: {candidate_teachers}\n")
+                time = np.random.choice(candidate_times, size=1, replace=False)
+                tensor[course, time, teacher] = self.prefs[teacher, course] 
+                teacher_loads[teacher] -= 1
+                candidate_times.remove(time)
+            
+            start = stop 
 
     def solve(self) -> None:
         reward, max_reward = 0, 0
         random_tensor = np.zeros(self.shape, dtype=self.dtype)
-        self.random_search()
-        return
+
         for self.iter in range(self.max_iter):
             self.random_search(random_tensor)
-            
+            self.tensor[:, :, :] = random_tensor[:, :, :]
+            break
             if self.is_valid_schedule():
                 self.tensor[:, :, :] = random_tensor[:, :, :]
+    
+    def reset(self, tensor=None) -> None:
+        if tensor is None:
+            tensor = self.tensor
+        tensor[:, :, :] = 0
             
     def done(self, reward: float) -> bool:
         if self.is_valid_schedule() and reward > self.sufficient_reward:

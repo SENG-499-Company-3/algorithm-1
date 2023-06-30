@@ -24,7 +24,7 @@ batch_size = 5
 
 
 
-def sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
+def sequential_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)
     start_time = time.time() 
     
@@ -36,7 +36,7 @@ def sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]:
     return None
 
 
-def batch_search(input_data: InputData = None) -> Union[HyperGraph, None]:
+def batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     hypergraphs = [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)] * batch_size
     start_time = time.time()
     
@@ -66,7 +66,7 @@ def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
     return None
 
 
-def distributed_sequential_search(input_data: InputData = None) -> Union[HyperGraph, None]: 
+def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]: 
     try:
         mp.set_start_method("spawn", force=True)
     
@@ -97,7 +97,7 @@ def distributed_sequential_search(input_data: InputData = None) -> Union[HyperGr
     return None
 
 
-def distributed_batch_search(input_data: InputData = None) -> Union[HyperGraph, None]:
+def distributed_batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     try:
         mp.set_start_method("spawn", force=True)
     
