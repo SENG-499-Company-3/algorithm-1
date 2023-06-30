@@ -34,7 +34,7 @@ app = FastAPI(
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
+def create_schedule(self, input_data: InputData = None) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
@@ -67,7 +67,7 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error]:
+def validate_schedule(self, schedule: Schedule = None) -> Union[IsValidSchedule, Error]:
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
