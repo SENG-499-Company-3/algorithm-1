@@ -40,7 +40,7 @@ class HyperGraph:
         sorted_pivots = np.sort(pivots)
         start = 0
         for pivot in sorted_pivots:
-            stop = pivot + 1
+            stop = pivot
             
             if stop - start > card_ti:
                 return False
@@ -107,7 +107,8 @@ class HyperGraph:
             if reward > max_reward:
                 self.iter = i 
                 max_reward = reward
-                self.tensor[:, :, :] = random_tensor[:, :, :] 
+                self.tensor[:, :, :] = random_tensor[:, :, :]
+                print(f"iter: {i}\nreward: {reward}\n")
 
             random_tensor[:, :, :] = 0
 
