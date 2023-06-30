@@ -10,11 +10,11 @@ from models import InputData
 TIMEOUT = 60.0
 courses, times, teachers = 33, 15, 29
 dims = {"courses":courses, "times":times, "teachers":teachers}
-#prefs = np.loadtxt("formatted_prefs.csv", delimiter=",")
-prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
+prefs = np.loadtxt("../data/formatted_prefs.csv", delimiter=",")
+#prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
 pivots = [5,10,15,20,25,33]
-max_iter = 5000
+max_iter = 10000
 P = np.arange(0,7, dtype=np.uint64)
 p_tgt = 4
 num_workers = 4
@@ -26,11 +26,11 @@ def sequential_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)
     start_time = time.time() 
     
-    while (start_time - time.time()) < TIMEOUT:
-        hg.solve()
-        if hg.is_valid_schedule():
-            return hg
-
+    #while (start_time - time.time()) < TIMEOUT:
+     
+    hg.solve()
+    return hg
+        
     return None
 
 
@@ -56,11 +56,8 @@ def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
         hg.solve()
     
     hypergraphs.sort(key = lambda hg: hg.calc_reward())
-    
-    for hg in hypergraphs:
-        if hg.is_valid_schedule():
-            return hg
-        
+    return hypergraphs[0]
+     
     return None
 
 

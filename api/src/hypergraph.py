@@ -3,9 +3,11 @@ from matplotlib import pyplot as plt
 from typing import List, Tuple
 
 
+
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1
 MAX_REQUIRED_COURSES_PER_TIME = 1
+
 
 
 class HyperGraph:
@@ -72,7 +74,7 @@ class HyperGraph:
             tensor = self.tensor
         
         teacher_loads = self.loads.copy()
-        card_c, card_ti, card_te = tensor.shape
+        _, card_ti, card_te = tensor.shape
         start = 0
 
         for pivot in self.pivots:
@@ -81,9 +83,9 @@ class HyperGraph:
              
             for course in range(start, stop):
                 candidate_teachers = [
-                        teacher for teacher in range(card_te) 
-                        if teacher_loads[teacher] > 0 and 
-                        self.prefs[teacher, course] >= self.p_tgt
+                    teacher for teacher in range(card_te) 
+                    if teacher_loads[teacher] > 0 and 
+                    self.prefs[teacher, course] >= self.p_tgt
                 ]
                 if not candidate_teachers: continue
                 teacher = np.random.choice(candidate_teachers, size=1)
@@ -98,15 +100,15 @@ class HyperGraph:
         reward, max_reward = 0, 0
         random_tensor = np.zeros(self.shape, dtype=self.dtype)
 
-        for self.iter in range(self.max_iter):
+        for i in range(self.max_iter):
             self.random_search(random_tensor)
             reward = self.calc_reward(random_tensor)
             
             if reward > max_reward:
-                print("better kekw")
+                self.iter = i 
                 max_reward = reward
                 self.tensor[:, :, :] = random_tensor[:, :, :] 
-            
+
             random_tensor[:, :, :] = 0
 
     def is_complete(self, tensor=None) -> bool:
@@ -211,4 +213,3 @@ class HyperGraph:
         courses, times, teachers = tensor.nonzero()
         ax.scatter(courses, times, teachers, c=teachers, alpha=1)
         plt.show()
-
