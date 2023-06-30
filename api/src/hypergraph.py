@@ -108,7 +108,6 @@ class HyperGraph:
                 self.iter = i 
                 max_reward = reward
                 self.tensor[:, :, :] = random_tensor[:, :, :]
-                print(f"iter: {i}\nreward: {reward}\n")
 
             random_tensor[:, :, :] = 0
 
