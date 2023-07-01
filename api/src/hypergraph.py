@@ -4,11 +4,9 @@ from matplotlib import pyplot as plt
 from typing import List, Tuple
 
 
-
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1
 MAX_REQUIRED_COURSES_PER_TIME = 1
-
 
 
 class HyperGraph:
@@ -60,7 +58,8 @@ class HyperGraph:
                     if teacher_loads[teacher] > 0 and 
                     self.prefs[teacher, course] >= self.p_tgt
                 ]
-                if not candidate_teachers: continue
+                if not candidate_teachers: 
+                    continue
                 teacher = int(np.random.choice(candidate_teachers, size=1))
                 time = int(np.random.choice(candidate_times, size=1, replace=False))
                 sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course] 
