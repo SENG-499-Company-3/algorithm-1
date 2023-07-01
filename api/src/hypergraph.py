@@ -32,38 +32,15 @@ class HyperGraph:
         self.max_iter = max_iter
         self.P = P
         self.p_tgt = p_tgt
-        self.set_sufficient_reward()
+        self.pivots = np.sort(required_course_pivots) 
+        self.sufficient_reward = self.shape[0] * np.tanh(self.p_tgt - np.median(self.P)) 
         self.sparse_tensor = {}
-        self.set_pivots(required_course_pivots)
-    
-    def set_pivots(self, pivots: List[int]) -> bool:
-        _, card_ti, _ = self.shape
-        sorted_pivots = np.sort(pivots)
-        start = 0
-        for pivot in sorted_pivots:
-            stop = pivot
-            
-            if stop - start > card_ti:
-                return False
-
-            start = stop
-
-        self.pivots = sorted_pivots
-        return True
-
-    def set_sufficient_reward(self) -> None:
-        card_c, _, _ = self.shape
-        self.sufficient_reward = card_c * np.tanh(self.p_tgt - np.median(self.P)) 
-    
+ 
     def calc_reward(self, sparse_tensor: dict = None) -> float:
         if sparse_tensor is None:
             sparse_tensor = self.sparse_tensor
 
-        p_hat = np.array(
-            list(sparse_tensor.values()), 
-            dtype=self.dtype
-        )
-
+        p_hat = np.array(list(sparse_tensor.values()), dtype=self.dtype)
         R = np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
 
         return R
@@ -170,17 +147,6 @@ class HyperGraph:
             proj[i, j] = 1
 
         return proj
-                
-    def sparse(self, tensor=None) -> dict:
-        if tensor is None:
-            tensor = self.tensor
-
-        courses, times, teachers = tensor.nonzero()
-        sparse_tensor = {
-            (courses[i], times[i], teachers[i]): self.prefs[teachers[i], courses[i]]
-            for i in range(courses.size)
-        }
-        return sparse_tensor
 
     def plot(self, tensor=None) -> None:
         if tensor is None:
