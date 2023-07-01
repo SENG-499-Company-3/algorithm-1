@@ -147,10 +147,10 @@ class HyperGraph:
 
         return proj
 
-    def plot(self, tensor=None) -> None:
-        if tensor is None:
-            tensor = self.tensor
-
+    def plot(self, sparse_tensor: dict = None) -> None:
+        if sparse_tensor is None:
+            sparse_tensor = self.sparse_tensor
+        
         plt.rcParams["figure.figsize"] = [10.00, 5.00]
         plt.rcParams["figure.autolayout"] = True
         fig = plt.figure()
@@ -158,6 +158,8 @@ class HyperGraph:
         ax.set_xlabel("$Courses$")
         ax.set_ylabel("$Times$")
         ax.set_zlabel("$Teachers$")
-        courses, times, teachers = tensor.nonzero()
+        courses = np.asarray([assignment[0] for assignment in sparse_tensor])
+        times = np.asarray([assignment[1] for assignment in sparse_tensor])
+        teachers = np.asarray([assignment[2] for assignment in sparse_tensor])
         ax.scatter(courses, times, teachers, c=teachers, alpha=1)
         plt.show()
