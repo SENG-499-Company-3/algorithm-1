@@ -58,8 +58,7 @@ class HyperGraph:
                     if teacher_loads[teacher] > 0 and 
                     self.prefs[teacher, course] >= self.p_tgt
                 ]
-                if not candidate_teachers: 
-                    continue
+                if not candidate_teachers: continue
                 teacher = int(np.random.choice(candidate_teachers, size=1))
                 time = int(np.random.choice(candidate_times, size=1, replace=False))
                 sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course] 
