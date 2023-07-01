@@ -83,10 +83,13 @@ class HyperGraph:
 
             random_tensor.clear()
 
-    def is_complete(self, sparse_tensor: dict) -> bool:
+    def is_complete(self, sparse_tensor: dict = None) -> bool:
+        if sparse_tensor is None:
+            sparse_tensor = self.sparse_tensor
+
         card_c, _, _ = self.shape
 
-        if len(self.sparse_tensor.items()) < card_c:
+        if len(sparse_tensor.items()) < card_c:
             return False
         
         return True
