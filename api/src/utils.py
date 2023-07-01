@@ -1,5 +1,6 @@
 import numpy as np
 from typing import List
+from models import InputData
 from hypergraph import HyperGraph
 
 
@@ -24,4 +25,3 @@ def numpy_to_fastapi_type_conversion(hg: HyperGraph) -> List[List[int]]:
     ]
     
     return fastapi_type_compatible_assignments 
-
