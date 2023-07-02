@@ -49,7 +49,7 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
         
         case HyperGraph(): 
             return Schedule(
-                assignments = numpy_to_fastapi_type_conversion(result), 
+                assignments = list(result.sparse_tensor.keys()), 
                 valid = result.is_valid_schedule(),
                 complete = result.is_complete()
             )
