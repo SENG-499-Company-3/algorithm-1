@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
 from hypergraph import HyperGraph
-from utils import numpy_to_fastapi_type_conversion
 from search_drivers import distributed_driver, sequential_driver
 
 

@@ -50,8 +50,8 @@ class HyperGraph:
 
         for pivot in self.pivots:
             stop = pivot 
-            candidate_times = [i for i in range(card_ti)]
-             
+            candidate_times = [ti for ti in range(card_ti)]
+
             for course in range(start, stop):
                 candidate_teachers = [
                     teacher for teacher in range(card_te) 

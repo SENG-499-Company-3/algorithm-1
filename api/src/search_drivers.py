@@ -40,8 +40,7 @@ def batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
             return hg 
 
 def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
-    if not hypergraphs: 
-        return None
+    if not hypergraphs: return None
 
     for hg in hypergraphs:
         hg.solve()
@@ -73,12 +72,11 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
         schd for schd in res if isinstance(schd, hg_type)
     ] 
     
-    if len(valid_schedules) > 0:
-        valid_schedules.sort(key = lambda hg: hg.calc_reward())
-        return valid_schedules[0]
+    if not valid_schedules: 
+        return None
     
-    return None
-
+    valid_schedules.sort(key = lambda hg: hg.calc_reward())
+    return valid_schedules[0]
 
 def distributed_batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     try:
@@ -103,9 +101,8 @@ def distributed_batch_driver(input_data: InputData = None) -> Union[HyperGraph, 
     valid_schedules = [
         schd for schd in res if isinstance(schd, hg_type)
     ] 
+    if not valid_schedules: 
+        return None
     
-    if len(valid_schedules) > 0:
-        valid_schedules.sort(key = lambda hg: hg.calc_reward())
-        return valid_schedules[0]
-    
-    return None
+    valid_schedules.sort(key = lambda hg: hg.calc_reward())
+    return valid_schedules[0] 
