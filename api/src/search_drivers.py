@@ -7,7 +7,6 @@ from models import InputData
 
 
 
-TIMEOUT = 60.0
 courses, times, teachers = 33, 15, 29
 dims = {"courses":courses, "times":times, "teachers":teachers}
 #prefs = np.loadtxt("../data/formatted_prefs.csv", delimiter=",")
@@ -17,7 +16,7 @@ pivots = [10,20,29,33]
 max_iter = 1000
 P = np.arange(0,7, dtype=np.uint64)
 p_tgt = 4
-num_workers = 1
+num_workers = 2
 batch_size = 5
 
 
@@ -57,16 +56,12 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
 
     with mp.get_context("spawn").Pool() as mp_pool:
         hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)) 
-        ret_types = []
-        start_time = time.time()
         
-        while hg_type not in ret_types and (time.time() - start_time) < TIMEOUT:
-            hg_pool = [
-                [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)]
-                for i in range(num_workers)
-            ]
-            res = mp_pool.map(async_solve, hg_pool)
-            ret_types = [type(graph) for graph in res]
+        hg_pool = [
+            [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)]
+            for i in range(num_workers)
+        ]
+        res = mp_pool.map(async_solve, hg_pool)
     
     valid_schedules = [
         schd for schd in res if isinstance(schd, hg_type)
@@ -87,16 +82,13 @@ def distributed_batch_driver(input_data: InputData = None) -> Union[HyperGraph, 
 
     with mp.get_context("spawn").Pool() as mp_pool:
         hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)) 
-        ret_types = []
-        start_time = time.time()
         
-        while hg_type not in ret_types and (time.time() - start_time) < TIMEOUT:
+        while hg_type not in ret_types:
             hg_pool = [
                 [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)] * batch_size 
                 for i in range(num_workers)
             ]
             res = mp_pool.map(async_solve, hg_pool)
-            ret_types = [type(graph) for graph in res]
     
     valid_schedules = [
         schd for schd in res if isinstance(schd, hg_type)
