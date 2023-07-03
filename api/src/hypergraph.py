@@ -15,7 +15,7 @@ class HyperGraph:
         dims: dict, 
         prefs: np.ndarray, 
         loads: np.ndarray,
-        required_course_pivots: List[int],
+        required_course_pivots: np.ndarray,
         max_iter: int = 1000, 
         P: np.arange = np.arange(7, dtype=np.uint8), 
         p_tgt: int = 4

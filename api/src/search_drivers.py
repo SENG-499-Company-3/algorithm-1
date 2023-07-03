@@ -11,7 +11,7 @@ courses, times, teachers = 33, 15, 29
 dims = {"courses":courses, "times":times, "teachers":teachers}
 prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
-pivots = [10,20,29,33]
+pivots = np.array([10,20,29,33], dtype=np.uint64)
 max_iter = 1000
 P = np.arange(0,7, dtype=np.uint64)
 p_tgt = 4
