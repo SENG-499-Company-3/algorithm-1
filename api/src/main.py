@@ -43,7 +43,7 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
             return Schedule(
                 assignments = [],
                 valid = False,
-                complete = False
+                complete = False,
                 reward = 0
             )
         

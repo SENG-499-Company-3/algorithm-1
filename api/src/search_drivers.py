@@ -25,6 +25,7 @@ def sequential_driver(input_data: InputData = None) -> HyperGraph:
     hg.solve()
     return hg
 
+
 def batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     hypergraphs = [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)] * batch_size
     
@@ -37,6 +38,7 @@ def batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
         if hg.is_valid_schedule():
             return hg 
 
+
 def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
     if not hypergraphs: return None
 
@@ -45,6 +47,7 @@ def async_solve(hypergraphs: List[HyperGraph]) -> Union[HyperGraph, None]:
     
     hypergraphs.sort(key = lambda hg: hg.calc_reward())
     return hypergraphs[0] 
+
 
 def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]: 
     try:
@@ -71,6 +74,7 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     
     valid_schedules.sort(key = lambda hg: hg.calc_reward())
     return valid_schedules[0]
+
 
 def distributed_batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     try:
