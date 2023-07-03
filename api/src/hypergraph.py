@@ -15,10 +15,10 @@ class HyperGraph:
         dims: dict, 
         prefs: np.ndarray, 
         loads: np.ndarray,
-        required_course_pivots: List[int],
+        required_course_pivots: np.ndarray,
         max_iter: int = 1000, 
         P: np.arange = np.arange(7, dtype=np.uint8), 
-        p_tgt: int = 3
+        p_tgt: int = 4
     ):
         self.dtype = np.uint8
         self.dims = dims
@@ -53,14 +53,17 @@ class HyperGraph:
             candidate_times = [ti for ti in range(card_ti)]
 
             for course in range(start, stop):
+                time = int(np.random.choice(candidate_times, size=1, replace=False))
+
                 candidate_teachers = [
-                    teacher for teacher in range(card_te) 
-                    if teacher_loads[teacher] > 0 and 
-                    self.prefs[teacher, course] >= self.p_tgt
+                    teacher for teacher in range(card_te) if
+                    teacher_loads[teacher] > 0 and 
+                    self.prefs[teacher, course] >= self.p_tgt and 
+                    not [(_, ti, te) for (_, ti, te) in sparse_tensor if ti == time and te == teacher] 
                 ]
+                
                 if not candidate_teachers: continue
                 teacher = int(np.random.choice(candidate_teachers, size=1))
-                time = int(np.random.choice(candidate_times, size=1, replace=False))
                 sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course] 
                 teacher_loads[teacher] -= 1
                 candidate_times.remove(time)
@@ -96,14 +99,27 @@ class HyperGraph:
     def is_valid_schedule(self, sparse_tensor: dict = None) -> bool:
         if sparse_tensor is None:
             sparse_tensor = self.sparse_tensor
-
+        
         no_course_time_conflicts = self.check_course_time_constraint(sparse_tensor) 
         no_course_teacher_conflicts = self.check_course_teacher_constraint(sparse_tensor)
+        no_teacher_time_conflicts = self.check_teacher_time_constraint(sparse_tensor)
 
-        if no_course_time_conflicts and no_course_teacher_conflicts:
+        if no_course_time_conflicts and no_course_teacher_conflicts and no_teacher_time_conflicts:
             return True
 
         return False
+
+    def check_teacher_time_constraint(self, sparse_tensor: dict) -> bool:
+        _, card_ti, card_te = self.shape 
+        teacher_time_collision = np.zeros((card_te, card_ti), dtype=self.dtype)
+        
+        for course, time, teacher in sparse_tensor:
+            teacher_time_collision[teacher, time] += 1
+        
+        if teacher_time_collision[teacher_time_collision > 1].size > 0:
+            return False
+
+        return True
 
     def check_course_time_constraint(self, sparse_tensor: dict) -> bool:
         proj = self.proj_2d(("courses", "times"), sparse_tensor)

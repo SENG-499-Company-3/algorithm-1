@@ -43,14 +43,18 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
             return Schedule(
                 assignments = [],
                 valid = False,
-                complete = False
+                complete = False,
+                reward = 0,
+                iterations = input_data.max_iter
             )
         
         case HyperGraph(): 
             return Schedule(
                 assignments = list(result.sparse_tensor.keys()), 
                 valid = result.is_valid_schedule(),
-                complete = result.is_complete()
+                complete = result.is_complete(),
+                reward = result.calc_reward(),
+                iterations = result.iter
             )
         
         case _:
