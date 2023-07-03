@@ -20,8 +20,9 @@ class IsValidSchedule(BaseModel):
 class Schedule(BaseModel):
     assignments: Optional[list] = None
     valid: Optional[bool] = None
-    complete: bool = None
+    complete: Optional[bool] = None
     reward: Optional[float] = None
+    iterations: Optional[int] = None
 
 
 class InputDataRooms(BaseModel):
@@ -71,3 +72,4 @@ class InputData(BaseModel):
     loads: Optional[List[List[int]]] = None
     availabilities: Optional[List[List[int]]] = None
     p_tgt: Optional[int] = None
+    max_iter: Optional[int] = None
