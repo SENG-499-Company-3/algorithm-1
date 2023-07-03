@@ -18,7 +18,7 @@ class HyperGraph:
         required_course_pivots: List[int],
         max_iter: int = 1000, 
         P: np.arange = np.arange(7, dtype=np.uint8), 
-        p_tgt: int = 3
+        p_tgt: int = 4
     ):
         self.dtype = np.uint8
         self.dims = dims

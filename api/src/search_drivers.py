@@ -9,7 +9,6 @@ from models import InputData
 
 courses, times, teachers = 33, 15, 29
 dims = {"courses":courses, "times":times, "teachers":teachers}
-#prefs = np.loadtxt("../data/formatted_prefs.csv", delimiter=",")
 prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
 pivots = [10,20,29,33]

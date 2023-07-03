@@ -21,6 +21,7 @@ class Schedule(BaseModel):
     assignments: Optional[list] = None
     valid: Optional[bool] = None
     complete: bool = None
+    reward: Optional[float] = None
 
 
 class InputDataRooms(BaseModel):
