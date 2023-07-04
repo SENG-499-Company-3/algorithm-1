@@ -91,7 +91,7 @@ class HyperGraph:
 
         card_c, _, _ = self.shape
 
-        if len(sparse_tensor.items()) < card_c:
+        if len(sparse_tensor) < card_c:
             return False
         
         return True
