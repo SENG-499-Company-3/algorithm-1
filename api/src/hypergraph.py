@@ -7,6 +7,7 @@ from typing import List, Tuple
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1
 MAX_REQUIRED_COURSES_PER_TIME = 1
+MAX_TIME_PER_TEACHER = 1
 
 
 class HyperGraph:
@@ -40,7 +41,6 @@ class HyperGraph:
 
         p_hat = np.array(list(sparse_tensor.values()), dtype=self.dtype)
         R = np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
-
         return R
 
     def random_search(self, sparse_tensor: dict) -> None:
@@ -111,12 +111,12 @@ class HyperGraph:
 
     def check_teacher_time_constraint(self, sparse_tensor: dict) -> bool:
         _, card_ti, card_te = self.shape 
-        teacher_time_collision = np.zeros((card_te, card_ti), dtype=self.dtype)
+        teacher_time_collisions = np.zeros((card_te, card_ti), dtype=self.dtype)
         
         for course, time, teacher in sparse_tensor:
-            teacher_time_collision[teacher, time] += 1
+            teacher_time_collisions[teacher, time] += 1
         
-        if teacher_time_collision[teacher_time_collision > 1].size > 0:
+        if teacher_time_collisions[teacher_time_collisions > MAX_TIME_PER_TEACHER].size > 0:
             return False
 
         return True
@@ -129,6 +129,7 @@ class HyperGraph:
             return False
          
         start = 0
+        
         for pivot in self.pivots:
             stop = pivot
             required_courses = num_times_per_course[start : stop] 
