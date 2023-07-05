@@ -3,9 +3,7 @@ from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
 from hypergraph import HyperGraph
-import numpy as np
-from lib import numpy_to_fastapi_type_conversion
-from search_drivers import distributed_batch_search, distributed_sequential_search, batch_search, sequential_search
+from search_drivers import distributed_driver, sequential_driver
 
 
 
@@ -38,21 +36,25 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
-    result = distributed_sequential_search(input_data)
+    result = distributed_driver(input_data)
     
     match result:
         case None:
             return Schedule(
                 assignments = [],
                 valid = False,
-                complete = False
+                complete = False,
+                reward = 0,
+                iterations = input_data.max_iter
             )
         
         case HyperGraph(): 
             return Schedule(
-                assignments = numpy_to_fastapi_type_conversion(result), 
+                assignments = list(result.sparse_tensor.keys()), 
                 valid = result.is_valid_schedule(),
-                complete = result.is_complete()
+                complete = result.is_complete(),
+                reward = result.calc_reward(),
+                iterations = result.iter
             )
         
         case _:
@@ -71,7 +73,7 @@ def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
-    result = sequential_search()
+    result = sequential_driver()
     
     match result:
         case None:
