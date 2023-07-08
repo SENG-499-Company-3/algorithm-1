@@ -44,10 +44,11 @@ class HyperGraph:
     def calc_reward(self, sparse_tensor: dict = None) -> Tuple[float, float]:
         if sparse_tensor is None:
             sparse_tensor = self.sparse_tensor
-        
-        c_hat = float(len(sparse_tensor) / self.shape[0])
+       
+        card_c, _, _ = self.shape
+        c_hat = float(len(sparse_tensor) / card_c)
         p_hat = np.array(list(sparse_tensor.values()), dtype=self.dtype)
-        R = (c_hat * self.shape[0]) + np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
+        R = (c_hat * card_c) + np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
         return (R, c_hat)
 
     def random_search(self, sparse_tensor: dict) -> None:
