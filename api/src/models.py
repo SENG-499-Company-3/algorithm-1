@@ -72,7 +72,7 @@ class InputData(BaseModel):
     dimensions: Optional[List[InputDataDimensions]] = None
     preferences: Optional[List[List[int]]] = None
     loads: Optional[List[List[int]]] = None
-    availabilities: Optional[List[List[int]]] = None
+    required_courses: Optional[List[int]] = None
     p_tgt: Optional[int] = None
     c_tgt: Optional[float] = None
     max_iter: Optional[int] = None

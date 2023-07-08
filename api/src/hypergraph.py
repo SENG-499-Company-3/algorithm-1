@@ -58,20 +58,20 @@ class HyperGraph:
 
         for pivot in self.pivots:
             stop = pivot 
-            candidate_times = [ti for ti in range(card_ti)]
+            candidate_times = {ti for ti in range(card_ti)}
 
             for course in range(start, stop):
-                time = int(np.random.choice(candidate_times, size=1, replace=False))
+                time = int(np.random.choice(list(candidate_times), size=1, replace=False))
 
-                candidate_teachers = [
+                candidate_teachers = {
                     teacher for teacher in range(card_te) if
                     teacher_loads[teacher] > 0 and 
                     self.prefs[teacher, course] >= self.p_tgt and 
-                    not [(_, ti, te) for (_, ti, te) in sparse_tensor if ti == time and te == teacher] 
-                ]
+                    not {(_, ti, te) for (_, ti, te) in sparse_tensor if ti == time and te == teacher}
+                }
                 
                 if not candidate_teachers: continue
-                teacher = int(np.random.choice(candidate_teachers, size=1))
+                teacher = int(np.random.choice(list(candidate_teachers), size=1))
                 sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course] 
                 teacher_loads[teacher] -= 1
                 candidate_times.remove(time)
@@ -126,7 +126,7 @@ class HyperGraph:
         for course, time, teacher in sparse_tensor:
             teacher_time_collisions[teacher, time] += 1
         
-        if teacher_time_collisions[teacher_time_collisions > MAX_TIME_PER_TEACHER].size > 0:
+        if teacher_time_collisions.any(where=teacher_time_collisions > MAX_TIME_PER_TEACHER):
             return False
 
         return True
@@ -135,7 +135,7 @@ class HyperGraph:
         proj = self.proj_2d(("courses", "times"), sparse_tensor)
         num_times_per_course = np.count_nonzero(proj, axis=1)
 
-        if num_times_per_course[num_times_per_course > MAX_TIMES_PER_COURSE].size > 0:
+        if num_times_per_course.any(where=num_times_per_course > MAX_TIMES_PER_COURSE):
             return False
          
         start = 0
@@ -144,7 +144,7 @@ class HyperGraph:
             stop = pivot
             required_courses = num_times_per_course[start : stop] 
             
-            if required_courses[required_courses > MAX_REQUIRED_COURSES_PER_TIME].size > 0:
+            if required_courses.any(where=required_courses > MAX_REQUIRED_COURSES_PER_TIME):
                 return False
             
             start = stop
@@ -156,10 +156,10 @@ class HyperGraph:
         num_courses_per_teacher = np.count_nonzero(proj, axis=1)
         num_teachers_per_course = np.count_nonzero(proj, axis=0)
 
-        if num_teachers_per_course[num_teachers_per_course > MAX_TEACHERS_PER_COURSE].size > 0:
+        if num_teachers_per_course.any(where=num_teachers_per_course > MAX_TEACHERS_PER_COURSE):
             return False
 
-        if num_courses_per_teacher[num_courses_per_teacher > self.loads].size > 0:
+        if num_courses_per_teacher.any(where=num_courses_per_teacher > self.loads):
             return False
 
         return True

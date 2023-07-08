@@ -47,7 +47,7 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
                 c_hat = 0.0,
                 reward = 0.0,
                 quality = 0.0,
-                assignments = [],
+                assignments = []
             )
         
         case HyperGraph(): 
@@ -58,7 +58,7 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
                 c_hat = float(result.c_hat),
                 reward = float(result.reward),
                 quality = float(result.quality),
-                assignments = list(result.sparse_tensor.keys()),
+                assignments = list(result.sparse_tensor.keys())
             )
         
         case _:
