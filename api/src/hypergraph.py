@@ -22,24 +22,24 @@ class HyperGraph:
         p_tgt: int = 4,
         c_tgt: float = 0.9
     ):
-        self.dtype = np.uint8
-        self.dims = dims
-        self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2}
-        self.shape = (dims["courses"], dims["times"], dims["teachers"])
+        self.dims = dims 
         self.prefs = prefs
         self.loads = loads
-        self.iter = 0
+        self.pivots = np.sort(required_course_pivots) 
         self.max_iter = max_iter
         self.P = P
         self.p_tgt = p_tgt
         self.c_tgt = c_tgt
+        self.dtype = np.uint8
+        self.sparse_tensor = {}
+        self.iter = 0
         self.c_hat = 0.0
-        self.pivots = np.sort(required_course_pivots) 
         self.reward = 0.0
         self.quality = 0.0
+        self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2} 
+        self.shape = (dims["courses"], dims["times"], dims["teachers"])
         self.sufficient_reward = self.shape[0] * (c_tgt + np.tanh(p_tgt - np.median(P))) 
         self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P))) 
-        self.sparse_tensor = {}
  
     def calc_reward(self, sparse_tensor: dict = None) -> Tuple[float, float]:
         if sparse_tensor is None:
