@@ -15,19 +15,20 @@ pivots = np.array([10,20,29,33], dtype=np.uint64)
 max_iter = 1000
 P = np.arange(0,7, dtype=np.uint64)
 p_tgt = 4
+c_tgt = 0.9
 num_workers = 2
 batch_size = 5
 
 
 
 def sequential_driver(input_data: InputData = None) -> HyperGraph:
-    hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)
+    hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt, c_tgt)
     hg.solve()
     return hg
 
 
 def batch_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
-    hypergraphs = [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)] * batch_size
+    hypergraphs = [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt, c_tgt)] * batch_size
     
     for hg in hypergraphs:
         hg.solve()
@@ -57,7 +58,7 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
         pass
 
     with mp.get_context("spawn").Pool() as mp_pool:
-        hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)) 
+        hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt, c_tgt)) 
         
         hg_pool = [
             [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)]
@@ -84,11 +85,11 @@ def distributed_batch_driver(input_data: InputData = None) -> Union[HyperGraph, 
         pass
 
     with mp.get_context("spawn").Pool() as mp_pool:
-        hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)) 
+        hg_type = type(HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt, c_tgt)) 
         
         while hg_type not in ret_types:
             hg_pool = [
-                [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)] * batch_size 
+                [HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt, c_tgt)] * batch_size 
                 for i in range(num_workers)
             ]
             res = mp_pool.map(async_solve, hg_pool)

@@ -19,7 +19,8 @@ class HyperGraph:
         required_course_pivots: np.ndarray,
         max_iter: int = 1000, 
         P: np.arange = np.arange(7, dtype=np.uint8), 
-        p_tgt: int = 4
+        p_tgt: int = 4,
+        c_tgt: float = 0.9
     ):
         self.dtype = np.uint8
         self.dims = dims
@@ -31,17 +32,23 @@ class HyperGraph:
         self.max_iter = max_iter
         self.P = P
         self.p_tgt = p_tgt
+        self.c_tgt = c_tgt
+        self.c_hat = 0.0
         self.pivots = np.sort(required_course_pivots) 
-        self.sufficient_reward = self.shape[0] * np.tanh(self.p_tgt - np.median(self.P)) 
+        self.reward = 0.0
+        self.quality = 0.0
+        self.sufficient_reward = self.shape[0] * (c_tgt + np.tanh(p_tgt - np.median(P))) 
+        self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P))) 
         self.sparse_tensor = {}
  
-    def calc_reward(self, sparse_tensor: dict = None) -> float:
+    def calc_reward(self, sparse_tensor: dict = None) -> Tuple[float, float]:
         if sparse_tensor is None:
             sparse_tensor = self.sparse_tensor
-
+        
+        c_hat = float(len(sparse_tensor) / self.shape[0])
         p_hat = np.array(list(sparse_tensor.values()), dtype=self.dtype)
-        R = np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
-        return R
+        R = (c_hat * self.shape[0]) + np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
+        return (R, c_hat)
 
     def random_search(self, sparse_tensor: dict) -> None:
         teacher_loads = self.loads.copy()
@@ -71,16 +78,18 @@ class HyperGraph:
             start = stop 
 
     def solve(self) -> None:
-        reward, max_reward = 0, 0
+        curr_reward = 0
         random_tensor = {}
 
         for i in range(self.max_iter):
             self.random_search(random_tensor)
-            reward = self.calc_reward(random_tensor)
+            curr_reward, c_hat = self.calc_reward(random_tensor)
             
-            if reward > max_reward:
+            if curr_reward > self.reward:
                 self.iter = i 
-                max_reward = reward
+                self.reward = curr_reward
+                self.c_hat = c_hat
+                self.quality = curr_reward / self.max_reward
                 self.sparse_tensor = copy.deepcopy(random_tensor)
 
             random_tensor.clear()

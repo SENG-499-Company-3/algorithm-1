@@ -18,11 +18,13 @@ class IsValidSchedule(BaseModel):
 
 
 class Schedule(BaseModel):
-    assignments: Optional[list] = None
+    iterations: Optional[int] = None
+    quality: Optional[float] = None
+    c_hat: Optional[float] = None
+    reward: Optional[float] = None
     valid: Optional[bool] = None
     complete: Optional[bool] = None
-    reward: Optional[float] = None
-    iterations: Optional[int] = None
+    assignments: Optional[list] = None
 
 
 class InputDataRooms(BaseModel):
@@ -72,4 +74,5 @@ class InputData(BaseModel):
     loads: Optional[List[List[int]]] = None
     availabilities: Optional[List[List[int]]] = None
     p_tgt: Optional[int] = None
+    c_tgt: Optional[float] = None
     max_iter: Optional[int] = None
