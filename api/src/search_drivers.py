@@ -14,7 +14,7 @@ pivots = np.array([10,20,27,33], dtype=np.uint64)
 max_iter = 1000
 P = np.arange(0,7, dtype=np.uint64)
 p_tgt = 4
-c_tgt = 0.9
+c_tgt = 0.8
 num_workers = 2
 batch_size = 5
 

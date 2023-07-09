@@ -20,7 +20,7 @@ class HyperGraph:
         max_iter: int = 1000, 
         P: np.arange = np.arange(7, dtype=np.uint8), 
         p_tgt: int = 4,
-        c_tgt: float = 0.9
+        c_tgt: float = 0.8
     ):
         self.dims = dims 
         self.prefs = prefs
