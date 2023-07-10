@@ -36,7 +36,7 @@ class HyperGraph:
         self.quality = 0.0
         self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2} 
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
-        self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P))) 
+        self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P)))
  
     def calc_reward(self, sparse_tensor: dict = None) -> Tuple[float, float]:
         if sparse_tensor is None:
@@ -49,8 +49,9 @@ class HyperGraph:
         return (R, c_hat)
 
     def random_search(self, sparse_tensor: dict) -> None:
-        teacher_loads = self.loads.copy()
         _, card_gamma, card_delta = self.shape
+        assigned_teachers_times = np.zeros(shape=(card_delta, card_gamma), dtype=self.dtype)
+        teacher_loads = self.loads.copy()
         start = 0
 
         for pivot in self.pivots:
@@ -64,12 +65,13 @@ class HyperGraph:
                     teacher for teacher in range(card_delta) if
                     teacher_loads[teacher] > 0 and 
                     self.prefs[teacher, course] >= self.p_tgt and 
-                    not {(_, ti, te) for (_, ti, te) in sparse_tensor if ti == time and te == teacher}
+                    not assigned_teachers_times[teacher, time]
                 }
-                
+                 
                 if not candidate_teachers: continue
                 teacher = int(np.random.choice(list(candidate_teachers), size=1))
-                sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course] 
+                sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course]
+                assigned_teachers_times[teacher, time] = 1
                 teacher_loads[teacher] -= 1
                 candidate_times.remove(time)
             
