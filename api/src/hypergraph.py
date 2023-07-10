@@ -20,7 +20,6 @@ class HyperGraph:
         max_iter: int = 1000, 
         P: np.arange = np.arange(7, dtype=np.uint8), 
         p_tgt: int = 4,
-        c_tgt: float = 0.8
     ):
         self.dims = dims 
         self.prefs = prefs
@@ -29,7 +28,6 @@ class HyperGraph:
         self.max_iter = max_iter
         self.P = P
         self.p_tgt = p_tgt
-        self.c_tgt = c_tgt
         self.dtype = np.uint8
         self.sparse_tensor = {}
         self.iter = 0
@@ -38,33 +36,32 @@ class HyperGraph:
         self.quality = 0.0
         self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2} 
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
-        self.sufficient_reward = self.shape[0] * (c_tgt + np.tanh(p_tgt - np.median(P))) 
         self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P))) 
  
     def calc_reward(self, sparse_tensor: dict = None) -> Tuple[float, float]:
         if sparse_tensor is None:
             sparse_tensor = self.sparse_tensor
        
-        card_c, _, _ = self.shape
-        c_hat = float(len(sparse_tensor) / card_c)
+        card_psi, _, _ = self.shape
+        c_hat = float(len(sparse_tensor) / card_psi)
         p_hat = np.array(list(sparse_tensor.values()), dtype=self.dtype)
-        R = (c_hat * card_c) + np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
+        R = (c_hat * card_psi) + np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
         return (R, c_hat)
 
     def random_search(self, sparse_tensor: dict) -> None:
         teacher_loads = self.loads.copy()
-        _, card_ti, card_te = self.shape
+        _, card_gamma, card_delta = self.shape
         start = 0
 
         for pivot in self.pivots:
             stop = pivot 
-            candidate_times = {ti for ti in range(card_ti)}
+            candidate_times = {ti for ti in range(card_gamma)}
 
             for course in range(start, stop):
                 time = int(np.random.choice(list(candidate_times), size=1, replace=False))
 
                 candidate_teachers = {
-                    teacher for teacher in range(card_te) if
+                    teacher for teacher in range(card_delta) if
                     teacher_loads[teacher] > 0 and 
                     self.prefs[teacher, course] >= self.p_tgt and 
                     not {(_, ti, te) for (_, ti, te) in sparse_tensor if ti == time and te == teacher}
@@ -99,9 +96,9 @@ class HyperGraph:
         if sparse_tensor is None:
             sparse_tensor = self.sparse_tensor
 
-        card_c, _, _ = self.shape
+        card_psi, _, _ = self.shape
 
-        if len(sparse_tensor) < card_c:
+        if len(sparse_tensor) < card_psi:
             return False
         
         return True
@@ -120,8 +117,8 @@ class HyperGraph:
         return False
 
     def check_teacher_time_constraint(self, sparse_tensor: dict) -> bool:
-        _, card_ti, card_te = self.shape 
-        teacher_time_collisions = np.zeros((card_te, card_ti), dtype=self.dtype)
+        _, card_gamma, card_delta = self.shape 
+        teacher_time_collisions = np.zeros((card_delta, card_gamma), dtype=self.dtype)
         
         for course, time, teacher in sparse_tensor:
             teacher_time_collisions[teacher, time] += 1

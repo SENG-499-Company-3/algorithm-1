@@ -74,5 +74,4 @@ class InputData(BaseModel):
     loads: Optional[List[List[int]]] = None
     required_courses: Optional[List[int]] = None
     p_tgt: Optional[int] = None
-    c_tgt: Optional[float] = None
     max_iter: Optional[int] = None
