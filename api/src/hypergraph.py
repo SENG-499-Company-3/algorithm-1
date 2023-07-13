@@ -1,7 +1,8 @@
 import numpy as np
+import itertools
 import copy
 from matplotlib import pyplot as plt
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 MAX_TEACHERS_PER_COURSE = 1
@@ -30,6 +31,7 @@ class HyperGraph:
         self.p_tgt = p_tgt
         self.dtype = np.uint8
         self.sparse_tensor = {}
+        self.candidates = {}
         self.iter = 0
         self.c_hat = 0.0
         self.reward = 0.0
@@ -67,7 +69,8 @@ class HyperGraph:
                     self.prefs[teacher, course] >= self.p_tgt and 
                     not assigned_teachers_times[teacher, time]
                 }
-                 
+
+                self.candidates[course] = (candidate_times, candidate_teachers)
                 if not candidate_teachers: continue
                 teacher = int(np.random.choice(list(candidate_teachers), size=1))
                 sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course]
@@ -175,7 +178,7 @@ class HyperGraph:
 
         return proj
 
-    def plot(self, sparse_tensor: dict = None) -> None:
+    def scatter(self, sparse_tensor: dict = None) -> None:
         if sparse_tensor is None:
             sparse_tensor = self.sparse_tensor
         
@@ -191,3 +194,34 @@ class HyperGraph:
         teachers = np.asarray([assignment[2] for assignment in sparse_tensor])
         ax.scatter(courses, times, teachers, c=teachers, alpha=1)
         plt.show()
+
+    def voxel(self, stop_psi_index: Union[int, None] = None) -> None:
+        card_psi, card_gamma, card_delta = self.shape
+        
+        if stop_psi_index is None or stop_psi_index > card_psi:
+            stop_psi_index = card_psi
+
+        candidates = self.candidates.copy()
+        assignments = list(self.sparse_tensor.copy())
+        assignemnts = assignments.reverse()
+        tensor = np.zeros(shape=self.shape, dtype=self.dtype)
+        colors = np.zeros(shape=[card_psi, card_gamma, card_delta, 4], dtype=np.float32)
+       
+        for psi_n in range(stop_psi_index):
+            tensor[psi_n, :, :] = 1
+            candidate_gamma, candidate_delta = candidates.pop(psi_n)
+            candidate_indices = itertools.product(candidate_gamma, candidate_delta)
+            
+            for gamma, delta in candidate_indices:
+                tensor[psi_n, gamma, delta] = 2
+            
+            if candidate_delta:
+                psi, gamma, delta = assignments.pop()
+                tensor[psi, gamma, delta] = 3
+
+            colors[tensor == 1] = [1, 0, 0, 0.9]
+            colors[tensor == 2] = [0, 0, 1, 0.9]
+            colors[tensor == 3] = [0, 1, 0, 0.9]
+            ax = plt.figure().add_subplot(projection='3d')
+            ax.voxels(tensor, facecolors=colors, edgecolor='k')
+            plt.show()
