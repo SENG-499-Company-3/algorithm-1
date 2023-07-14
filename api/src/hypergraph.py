@@ -70,12 +70,17 @@ class HyperGraph:
                     not assigned_teachers_times[teacher, time]
                 }
 
-                self.candidates[course] = (candidate_times, candidate_teachers)
                 if not candidate_teachers: continue
                 teacher = int(np.random.choice(list(candidate_teachers), size=1))
                 sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course]
                 assigned_teachers_times[teacher, time] = 1
                 teacher_loads[teacher] -= 1
+
+                self.candidates[course] = (
+                    copy.deepcopy(candidate_times), 
+                    copy.deepcopy(candidate_teachers)
+                )
+                
                 candidate_times.remove(time)
             
             start = stop 
@@ -201,23 +206,21 @@ class HyperGraph:
         if stop_psi_index is None or stop_psi_index > card_psi:
             stop_psi_index = card_psi
 
-        candidates = self.candidates.copy()
-        assignments = list(self.sparse_tensor.copy())
-        assignemnts = assignments.reverse()
         tensor = np.zeros(shape=self.shape, dtype=self.dtype)
         colors = np.zeros(shape=[card_psi, card_gamma, card_delta, 4], dtype=np.float32)
        
         for psi_n in range(stop_psi_index):
             tensor[psi_n, :, :] = 1
-            candidate_gamma, candidate_delta = candidates.pop(psi_n)
-            candidate_indices = itertools.product(candidate_gamma, candidate_delta)
             
-            for gamma, delta in candidate_indices:
-                tensor[psi_n, gamma, delta] = 2
+            if psi_n in self.candidates:
+                candidate_gammas, candidate_deltas = self.candidates[psi_n]
+                candidate_indices = itertools.product(candidate_gammas, candidate_deltas)
             
-            if candidate_delta:
-                psi, gamma, delta = assignments.pop()
-                tensor[psi, gamma, delta] = 3
+                for gamma, delta in candidate_indices:
+                    tensor[psi_n, gamma, delta] = 2
+                    
+                    if (psi_n, gamma, delta) in self.sparse_tensor:
+                        tensor[psi_n, gamma, delta] = 3
 
             colors[tensor == 1] = [1, 0, 0, 0.9]
             colors[tensor == 2] = [0, 0, 1, 0.9]
