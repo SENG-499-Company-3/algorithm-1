@@ -38,7 +38,6 @@ class HyperGraph:
         self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2} 
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
         self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P)))
-        self.candidates = np.ndarray(shape=(self.shape[0],), dtype=object)
  
     def calc_reward(self, sparse_tensor: dict = None) -> Tuple[float, float]:
         if sparse_tensor is None:
@@ -71,18 +70,11 @@ class HyperGraph:
                 }
 
                 if not candidate_teachers: continue
-                                
-                self.candidates[course] = (
-                    copy.deepcopy(candidate_times), 
-                    copy.deepcopy(candidate_teachers)
-                )
-
                 teacher = int(np.random.choice(list(candidate_teachers), size=1))
                 sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course]
                 assigned_teachers_times[teacher, time] = 1
                 teacher_loads[teacher] -= 1            
                 candidate_times.remove(time)
-                candidate_teachers.clear()
             
             start = stop 
 
@@ -201,7 +193,7 @@ class HyperGraph:
         ax.scatter(courses, times, teachers, c=teachers, alpha=1)
         plt.show()
 
-    def voxel(self, stop_psi_index: Union[int, None] = None) -> None:
+    def visualize(self, stop_psi_index: Union[int, None] = None) -> None:
         card_psi, card_gamma, card_delta = self.shape
         
         if stop_psi_index is None or stop_psi_index > card_psi:
@@ -209,21 +201,41 @@ class HyperGraph:
 
         tensor = np.zeros(shape=self.shape, dtype=self.dtype)
         colors = np.zeros(shape=[card_psi, card_gamma, card_delta, 4], dtype=np.float32)
-        
-        for psi in range(stop_psi_index):
-            tensor[psi, :, :] = 1
-            candidate_gamma, candidate_delta = self.candidates[psi]
-            candidate_indices = itertools.product(candidate_gamma, candidate_delta)
-            
-            for gamma, delta in candidate_indices:
-                tensor[psi, gamma, delta] = 2
-                    
-                if (psi, gamma, delta) in self.sparse_tensor:
-                    tensor[psi, gamma, delta] = 3
-            
-            colors[tensor == 1] = [1, 0, 0, 1.0]
-            colors[tensor == 2] = [0, 0, 1, 1.0]
-            colors[tensor == 3] = [0, 1, 0, 1.0]
-            ax = plt.figure().add_subplot(projection='3d')
-            ax.voxels(tensor, facecolors=colors, edgecolor='k')
-            plt.show()
+        assigned_teachers_times = np.zeros(shape=(card_delta, card_gamma), dtype=self.dtype)
+        teacher_loads = self.loads.copy()
+        start = 0
+
+        for pivot in self.pivots:
+            stop = min(pivot, stop_psi_index) 
+            candidate_gammas = {g for g in range(card_gamma)}
+
+            for psi in range(start, stop):
+                tensor[psi, :, :] = 1
+                gamma = int(np.random.choice(list(candidate_gammas), size=1, replace=False)) 
+                candidate_deltas = {
+                    delta for delta in range(card_delta) if
+                    teacher_loads[delta] > 0 and 
+                    self.prefs[delta, psi] >= self.p_tgt and 
+                    not assigned_teachers_times[delta, gamma]
+                }
+
+                if not candidate_deltas: continue
+                candidate_indices = itertools.product(candidate_gammas, candidate_deltas)
+                
+                for g, d in candidate_indices:
+                    tensor[psi, g, d] = 2
+
+                delta = int(np.random.choice(list(candidate_deltas), size=1))
+                tensor[psi, gamma, delta] = 3
+                assigned_teachers_times[delta, gamma] = 1
+                teacher_loads[delta] -= 1
+                candidate_gammas.remove(gamma)
+           
+                colors[tensor == 1] = [1, 0, 0, 1.0]
+                colors[tensor == 2] = [0, 0, 1, 1.0]
+                colors[tensor == 3] = [0, 1, 0, 1.0]
+                ax = plt.figure().add_subplot(projection='3d')
+                ax.voxels(tensor, facecolors=colors, edgecolor='k')
+                plt.show()
+                
+            start = stop
