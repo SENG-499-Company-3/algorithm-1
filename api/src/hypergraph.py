@@ -31,7 +31,6 @@ class HyperGraph:
         self.p_tgt = p_tgt
         self.dtype = np.uint8
         self.sparse_tensor = {}
-        self.candidates = {}
         self.iter = 0
         self.c_hat = 0.0
         self.reward = 0.0
@@ -39,6 +38,7 @@ class HyperGraph:
         self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2} 
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
         self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P)))
+        self.candidates = np.ndarray(shape=(self.shape[0],), dtype=object)
  
     def calc_reward(self, sparse_tensor: dict = None) -> Tuple[float, float]:
         if sparse_tensor is None:
@@ -71,17 +71,18 @@ class HyperGraph:
                 }
 
                 if not candidate_teachers: continue
-                teacher = int(np.random.choice(list(candidate_teachers), size=1))
-                sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course]
-                assigned_teachers_times[teacher, time] = 1
-                teacher_loads[teacher] -= 1
-
+                                
                 self.candidates[course] = (
                     copy.deepcopy(candidate_times), 
                     copy.deepcopy(candidate_teachers)
                 )
-                
+
+                teacher = int(np.random.choice(list(candidate_teachers), size=1))
+                sparse_tensor[(course, time, teacher)] = self.prefs[teacher, course]
+                assigned_teachers_times[teacher, time] = 1
+                teacher_loads[teacher] -= 1            
                 candidate_times.remove(time)
+                candidate_teachers.clear()
             
             start = stop 
 
@@ -208,23 +209,21 @@ class HyperGraph:
 
         tensor = np.zeros(shape=self.shape, dtype=self.dtype)
         colors = np.zeros(shape=[card_psi, card_gamma, card_delta, 4], dtype=np.float32)
-       
-        for psi_n in range(stop_psi_index):
-            tensor[psi_n, :, :] = 1
+        
+        for psi in range(stop_psi_index):
+            tensor[psi, :, :] = 1
+            candidate_gamma, candidate_delta = self.candidates[psi]
+            candidate_indices = itertools.product(candidate_gamma, candidate_delta)
             
-            if psi_n in self.candidates:
-                candidate_gammas, candidate_deltas = self.candidates[psi_n]
-                candidate_indices = itertools.product(candidate_gammas, candidate_deltas)
-            
-                for gamma, delta in candidate_indices:
-                    tensor[psi_n, gamma, delta] = 2
+            for gamma, delta in candidate_indices:
+                tensor[psi, gamma, delta] = 2
                     
-                    if (psi_n, gamma, delta) in self.sparse_tensor:
-                        tensor[psi_n, gamma, delta] = 3
-
-            colors[tensor == 1] = [1, 0, 0, 0.9]
-            colors[tensor == 2] = [0, 0, 1, 0.9]
-            colors[tensor == 3] = [0, 1, 0, 0.9]
+                if (psi, gamma, delta) in self.sparse_tensor:
+                    tensor[psi, gamma, delta] = 3
+            
+            colors[tensor == 1] = [1, 0, 0, 1.0]
+            colors[tensor == 2] = [0, 0, 1, 1.0]
+            colors[tensor == 3] = [0, 1, 0, 1.0]
             ax = plt.figure().add_subplot(projection='3d')
             ax.voxels(tensor, facecolors=colors, edgecolor='k')
             plt.show()
