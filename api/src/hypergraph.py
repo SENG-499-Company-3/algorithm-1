@@ -1,9 +1,10 @@
+import random
 import numpy as np
 import itertools
 import copy
 from matplotlib import pyplot as plt
 from typing import List, Tuple, Union
-
+from api.data.rooms import ROOMS
 
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1
@@ -120,10 +121,10 @@ class HyperGraph:
         return False
 
     def check_teacher_time_constraint(self, sparse_tensor: dict) -> bool:
-        _, card_gamma, card_delta = self.shape 
+        _, card_gamma, card_delta = self.shape
         teacher_time_collisions = np.zeros((card_delta, card_gamma), dtype=self.dtype)
-        
-        for course, time, teacher in sparse_tensor:
+
+        for course, time, teacher, classroom in sparse_tensor:
             teacher_time_collisions[teacher, time] += 1
         
         if teacher_time_collisions.any(where=teacher_time_collisions > MAX_TIME_PER_TEACHER):

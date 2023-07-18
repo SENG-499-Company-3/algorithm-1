@@ -18,7 +18,6 @@ num_workers = 8
 batch_size = 1
 
 
-
 def sequential_driver(input_data: InputData = None) -> HyperGraph:
     hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)
     hg.solve()
