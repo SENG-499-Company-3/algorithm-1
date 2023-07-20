@@ -4,10 +4,8 @@ from typing import List, Union
 from hypergraph import HyperGraph
 from models import InputData
 
-
-
-courses, times, teachers = 33, 15, 29
-dims = {"courses":courses, "times":times, "teachers":teachers}
+courses, times, teachers, num_rooms = 33, 15, 29, 123
+dims = {"courses": courses, "times": times, "teachers": teachers, "rooms": num_rooms}
 prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
 pivots = np.array([10,20,27,33], dtype=np.uint64)
@@ -53,10 +51,11 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
         hypergraphs = [hg] * batch_size
         res = mp_pool.map(async_solve, hypergraphs)
     
-    valid_schedules = [schd for schd in res if isinstance(schd, hg_type)] 
+    valid_schedules = [schd for schd in res if isinstance(schd, hg_type)]
     
     if not valid_schedules: 
         return None
     
     valid_schedules.sort(key = lambda hg: hg.reward)
+    valid_schedules[0].add_rooms()
     return valid_schedules[0]
