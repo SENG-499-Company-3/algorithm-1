@@ -16,6 +16,11 @@ class Success(BaseModel):
 class IsValidSchedule(BaseModel):
     valid: bool
 
+class Assignment(BaseModel):
+    course: InputDataCourses
+    prof: InputDataProfessors
+    timeslot: InputDataTimeslots
+    room: InputDataRooms
 
 class Schedule(BaseModel):
     iterations: Optional[int] = None
@@ -24,7 +29,7 @@ class Schedule(BaseModel):
     reward: Optional[float] = None
     valid: Optional[bool] = None
     complete: Optional[bool] = None
-    assignments: Optional[list] = None
+    assignments: Optional[List[Assignment]] = None
 
 
 class InputDataRooms(BaseModel):
