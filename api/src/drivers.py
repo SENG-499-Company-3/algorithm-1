@@ -12,7 +12,7 @@ prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
 loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
 pivots = np.array([10,20,27,33], dtype=np.uint64)
 max_iter = 500
-P = np.arange(0,7, dtype=np.uint64)
+P = np.arange(0, 7, dtype=np.uint64)
 p_tgt = 4
 num_workers = 8
 batch_size = 1
@@ -31,6 +31,17 @@ def async_solve(hg: HyperGraph) -> Union[HyperGraph, None]:
 
 
 def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]: 
+    dims = {
+        "courses":  input_data.dimensions.courses, 
+        "times":    input_data.dimensions.times, 
+        "teachers": input_data.dimensions.teachers
+    }
+    prefs = np.asarray(input_data.preferences)
+    loads = np.asarray(input_data.loads)
+    pivots = np.asarray(input_data.required_courses)
+    max_iter = input_data.max_iter 
+    p_tgt = input_data.p_tgt
+    
     try:
         mp.set_start_method("spawn", force=True)
     
