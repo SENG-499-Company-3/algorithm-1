@@ -25,15 +25,25 @@ def add_rooms(hypergraph: HyperGraph = None, input_data: InputData = None):
             course_capacity = course[2]
             for classroom in rooms:
                 class_capacity = classroom.capacity
-                if 10 <= (class_capacity - course_capacity)*100/class_capacity <= 25 \
+                if 10 <= (class_capacity - course_capacity) * 100 / class_capacity <= 25 \
                         and classroom not in assigned_classrooms:
                     rooms_dict[course_num] = classroom
                     assigned_classrooms.append(classroom)
-                    print("course {} with capacity {} in block {} -> classroom {} with capacity {}".format(course_num, course_capacity, time_block, classroom.location, classroom.capacity))
                     assigned = True
                     break
-                if not assigned:
-                    rooms_dict[course_num] = (InputDataRooms(location="", capacity=0, equipment=[]))
-                    hypergraph.courses_without_rooms.append(course_num)
+            if not assigned:
+                for classroom in rooms:
+                    class_capacity = classroom.capacity
+                    # Last attempt to assign a classroom
+                    if (class_capacity - course_capacity) >= 0 and classroom not in assigned_classrooms:
+                        print("on last attempt for course: " + str(course_num) + " in time block: " + str(
+                            time_block) + "\n")
+                        rooms_dict[course_num] = classroom
+                        assigned_classrooms.append(classroom)
+                        assigned = True
+                        break
+            if not assigned:
+                rooms_dict[course_num] = (InputDataRooms(location="", capacity=0, equipment=[]))
+                hypergraph.courses_without_rooms.append(course_num)
         assigned_classrooms.clear()
     return rooms_dict
