@@ -57,5 +57,4 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
         return None
     
     valid_schedules.sort(key = lambda hg: hg.reward)
-    valid_schedules[0].add_rooms()
     return valid_schedules[0]

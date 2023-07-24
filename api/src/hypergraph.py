@@ -124,7 +124,7 @@ class HyperGraph:
         _, card_gamma, card_delta = self.shape
         teacher_time_collisions = np.zeros((card_delta, card_gamma), dtype=self.dtype)
 
-        for course, time, teacher, classroom in sparse_tensor:
+        for course, time, teacher in sparse_tensor:
             teacher_time_collisions[teacher, time] += 1
         
         if teacher_time_collisions.any(where=teacher_time_collisions > MAX_TIME_PER_TEACHER):

@@ -4,8 +4,7 @@ from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
 from hypergraph import HyperGraph
 from drivers import distributed_driver, sequential_driver
-
-
+from generateschedule import generate_schedule
 
 app = FastAPI(
     title="SENG 499 API",
@@ -36,7 +35,8 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
-    result = distributed_driver(input_data)
+    result = generate_schedule(input_data)
+    # result = distributed_driver(input_data)
     
     match result:
         case None:
