@@ -16,21 +16,6 @@ class Success(BaseModel):
 class IsValidSchedule(BaseModel):
     valid: bool
 
-class Assignment(BaseModel):
-    course: InputDataCourses
-    prof: InputDataProfessors
-    timeslot: InputDataTimeslots
-    room: InputDataRooms
-
-class Schedule(BaseModel):
-    iterations: Optional[int] = None
-    quality: Optional[float] = None
-    c_hat: Optional[float] = None
-    reward: Optional[float] = None
-    valid: Optional[bool] = None
-    complete: Optional[bool] = None
-    assignments: Optional[List[Assignment]] = None
-
 
 class InputDataRooms(BaseModel):
     location: Optional[str] = None
@@ -74,9 +59,27 @@ class InputData(BaseModel):
     timeslots: Optional[List[InputDataTimeslots]] = None
     courses: Optional[List[InputDataCourses]] = None
     professors: Optional[List[InputDataProfessors]] = None
-    dimensions: Optional[List[InputDataDimensions]] = None
+    dimensions: Optional[InputDataDimensions] = None
     preferences: Optional[List[List[int]]] = None
-    loads: Optional[List[List[int]]] = None
+    loads: Optional[List[int]] = None
     required_courses: Optional[List[int]] = None
     p_tgt: Optional[int] = None
     max_iter: Optional[int] = None
+
+
+class Assignment(BaseModel):
+    course: Optional[InputDataCourses] = None
+    prof: Optional[InputDataProfessors] = None
+    timeslot: Optional[InputDataTimeslots] = None
+    room: Optional[InputDataRooms] = None
+
+
+class Schedule(BaseModel):
+    iterations: Optional[int] = None
+    quality: Optional[float] = None
+    c_hat: Optional[float] = None
+    reward: Optional[float] = None
+    valid: Optional[bool] = None
+    complete: Optional[bool] = None
+    assignments: Optional[List[Assignment]] = None
+

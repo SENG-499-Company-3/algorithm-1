@@ -1,15 +1,14 @@
+import random
 import numpy as np
 import itertools
 import copy
 from matplotlib import pyplot as plt
 from typing import List, Tuple, Union
 
-
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1
 MAX_REQUIRED_COURSES_PER_TIME = 1
 MAX_TIME_PER_TEACHER = 1
-
 
 class HyperGraph:
     def __init__(
@@ -25,7 +24,7 @@ class HyperGraph:
         self.dims = dims 
         self.prefs = prefs
         self.loads = loads
-        self.pivots = np.sort(required_course_pivots) 
+        self.pivots = np.sort(required_course_pivots)
         self.max_iter = max_iter
         self.P = P
         self.p_tgt = p_tgt
@@ -35,6 +34,7 @@ class HyperGraph:
         self.c_hat = 0.0
         self.reward = 0.0
         self.quality = 0.0
+        self.courses_without_rooms = []
         self.dim_idx_map = {"courses": 0, "times": 1, "teachers": 2} 
         self.shape = (dims["courses"], dims["times"], dims["teachers"])
         self.max_reward = self.shape[0] * (1 + np.tanh(P.max() - np.median(P)))
@@ -101,7 +101,7 @@ class HyperGraph:
 
         card_psi, _, _ = self.shape
 
-        if len(sparse_tensor) < card_psi:
+        if len(sparse_tensor) < card_psi or len(self.courses_without_rooms) > 0:
             return False
         
         return True
@@ -120,9 +120,9 @@ class HyperGraph:
         return False
 
     def check_teacher_time_constraint(self, sparse_tensor: dict) -> bool:
-        _, card_gamma, card_delta = self.shape 
+        _, card_gamma, card_delta = self.shape
         teacher_time_collisions = np.zeros((card_delta, card_gamma), dtype=self.dtype)
-        
+
         for course, time, teacher in sparse_tensor:
             teacher_time_collisions[teacher, time] += 1
         
