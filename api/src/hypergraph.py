@@ -4,7 +4,6 @@ import itertools
 import copy
 from matplotlib import pyplot as plt
 from typing import List, Tuple, Union
-from api.data.rooms import ROOMS
 
 MAX_TEACHERS_PER_COURSE = 1
 MAX_TIMES_PER_COURSE = 1

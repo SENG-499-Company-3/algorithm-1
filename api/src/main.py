@@ -4,7 +4,9 @@ from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
 from hypergraph import HyperGraph
 from drivers import distributed_driver, sequential_driver
-from generateschedule import generate_schedule
+from generate_schedule import generate_schedule
+from mock_request import MOCK_REQUEST
+
 
 app = FastAPI(
     title="SENG 499 API",
@@ -31,7 +33,7 @@ app = FastAPI(
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
+def create_schedule(input_data: InputData = MOCK_REQUEST) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """

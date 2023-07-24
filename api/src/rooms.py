@@ -1,6 +1,6 @@
 from hypergraph import HyperGraph
 from models import InputData, InputDataRooms
-from hypergraph import *
+from hypergraph import HyperGraph
 
 
 def add_rooms(hypergraph: HyperGraph = None, input_data: InputData = None):
