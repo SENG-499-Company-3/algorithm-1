@@ -1,5 +1,6 @@
 from __future__ import annotations
-from models import *
+from typing import Optional
+from models import InputData, Assignment, Schedule
 from drivers import distributed_driver
 from hypergraph import HyperGraph
 from rooms import add_rooms
@@ -9,7 +10,6 @@ def generate_schedule(input_data: InputData):
     hypergraph = distributed_driver(input_data)
     rooms_dict = add_rooms(hypergraph, input_data)
     assignments_list = []
-    Assignment.update_forward_refs() 
 
     for key in hypergraph.sparse_tensor:
         course, time, teacher = key
@@ -19,6 +19,7 @@ def generate_schedule(input_data: InputData):
             timeslot = input_data.timeslots[time], 
             room = rooms_dict[course]
         )
+        Assignment.update_forward_refs() 
         assignments_list.append(assignment)
     
     schedule = Schedule(
