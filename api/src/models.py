@@ -38,13 +38,14 @@ class InputDataCourses(BaseModel):
     capacity: Optional[int] = None
 
 
-class InputDataProfessors(BaseModel):
+class InputdataProfessors(BaseModel):
     name: Optional[str] = None
     courses: Optional[List[str]] = None
     timePreferences: Optional[List[str]] = None
-    coursePreferences: Optional[List[str]] = None
+    coursePreferences: Optional[List[int]] = None
     dayPreferences: Optional[List[str]] = None
     equipmentPreferences: Optional[List[str]] = None
+    load: Optional[int] = None
 
 
 class InputDataDimensions(BaseModel):
