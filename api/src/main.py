@@ -36,34 +36,25 @@ def create_schedule(input_data: InputData = None) -> Union[Schedule, Error]:
     Algorithm 1 endpoint to generate a schedule
     """
     result = generate_schedule(input_data)
-    # result = distributed_driver(input_data)
-    
+
     match result:
         case None:
             return Schedule(
-                iterations = input_data.max_iter,
-                valid = False,
-                complete = False,
-                c_hat = 0.0,
-                reward = 0.0,
-                quality = 0.0,
-                assignments = []
+                iterations=input_data.max_iter,
+                valid=False,
+                complete=False,
+                c_hat=0.0,
+                reward=0.0,
+                quality=0.0,
+                assignments=[]
             )
-        
-        case HyperGraph(): 
-            return Schedule(
-                iterations = result.iter,
-                valid = result.is_valid_schedule(),
-                complete = result.is_complete(),
-                c_hat = float(result.c_hat),
-                reward = float(result.reward),
-                quality = float(result.quality),
-                assignments = []
-            )
-        
+
+        case Schedule():
+            return result
+
         case _:
             return Error(
-               message = "RuhRohRaggy"
+                message="RuhRohRaggy"
             )
 
 
@@ -78,19 +69,19 @@ def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error
     Algorithm 1 endpoint to validate an existing schedule
     """
     result = sequential_driver()
-    
+
     match result:
         case None:
             return IsValidSchedule(
-                valid = False
+                valid=False
             )
-        
-        case HyperGraph(): 
+
+        case HyperGraph():
             return IsValidSchedule(
-                valid = result.is_valid_schedule()
+                valid=result.is_valid_schedule()
             )
 
         case _:
             return Error(
-               message = "RuhRohRaggy"
+                message="RuhRohRaggy"
             )

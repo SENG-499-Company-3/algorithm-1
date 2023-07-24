@@ -24,37 +24,37 @@ def sequential_driver(input_data: InputData = None) -> HyperGraph:
 
 def async_solve(hg: HyperGraph) -> Union[HyperGraph, None]:
     hg.solve()
-    return hg 
+    return hg
 
 
-def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]: 
+def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     dims = {
-        "courses":  input_data.dimensions.courses, 
-        "times":    input_data.dimensions.times, 
+        "courses": input_data.dimensions.courses,
+        "times": input_data.dimensions.times,
         "teachers": input_data.dimensions.teachers
     }
     prefs = np.asarray(input_data.preferences)
     loads = np.asarray(input_data.loads)
     pivots = np.asarray(input_data.required_courses)
-    max_iter = input_data.max_iter 
+    max_iter = input_data.max_iter
     p_tgt = input_data.p_tgt
-    
+
     try:
         mp.set_start_method("spawn", force=True)
-    
+
     except RuntimeError:
         pass
 
     with mp.get_context("spawn").Pool(num_workers) as mp_pool:
         hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)
-        hg_type = type(hg) 
+        hg_type = type(hg)
         hypergraphs = [hg] * batch_size
         res = mp_pool.map(async_solve, hypergraphs)
-    
+
     valid_schedules = [schd for schd in res if isinstance(schd, hg_type)]
-    
-    if not valid_schedules: 
+
+    if not valid_schedules:
         return None
-    
-    valid_schedules.sort(key = lambda hg: hg.reward)
+
+    valid_schedules.sort(key=lambda hg: hg.reward)
     return valid_schedules[0]
