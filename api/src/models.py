@@ -83,4 +83,4 @@ class Schedule(BaseModel):
     valid: Optional[bool] = None
     complete: Optional[bool] = None
     assignments: Optional[List[Assignment]] = None
-
+    inputData: Optional[InputData] = None
