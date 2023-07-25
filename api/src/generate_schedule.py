@@ -42,7 +42,6 @@ def generate_schedule(input_data: InputData):
         complete =      bool(hg.is_complete()), 
         assignments =   assignments_list,
         inputData =     input_data,
-        sparse_tensor = list(hg.sparse_tensor.keys())
     )
     
     return schedule

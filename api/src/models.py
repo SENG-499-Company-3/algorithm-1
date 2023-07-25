@@ -87,4 +87,3 @@ class Schedule(BaseModel):
     complete: Optional[bool] = None
     assignments: Optional[List[Assignment]] = None
     inputData: Optional[InputData] = None
-    sparse_tensor: Optional[List[List[int]]] = None
