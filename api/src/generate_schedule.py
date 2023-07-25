@@ -1,4 +1,5 @@
 from __future__ import annotations
+import itertools
 from typing import Optional
 from models import InputData, Assignment, Schedule
 from drivers import distributed_driver
@@ -17,11 +18,11 @@ def generate_schedule(input_data: InputData):
             course = input_data.courses[course], 
             prof = input_data.professors[teacher],
             timeslot = input_data.timeslots[time], 
-            room = rooms_dict[course]
+            room = rooms_dict[course] 
         )
-        Assignment.update_forward_refs() 
+        assignment.prof.load -= 1
         assignments_list.append(assignment)
-    
+     
     schedule = Schedule(
         iterations = hypergraph.iter, 
         quality = hypergraph.quality, 

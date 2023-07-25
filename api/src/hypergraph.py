@@ -49,7 +49,7 @@ class HyperGraph:
         R = (c_hat * card_psi) + np.sum(np.tanh(p_hat - np.median(self.P)), dtype=np.float32)
         return (R, c_hat)
 
-    def random_search(self, sparse_tensor: dict) -> None:
+    def random_search(self, sparse_tensor: dict) -> np.ndarray:
         _, card_gamma, card_delta = self.shape
         assigned_teachers_times = np.zeros(shape=(card_delta, card_gamma), dtype=self.dtype)
         teacher_loads = self.loads.copy()
@@ -78,12 +78,15 @@ class HyperGraph:
             
             start = stop 
 
+        return teacher_loads
+
     def solve(self) -> None:
         curr_reward = 0
+        curr_loads = None
         random_tensor = {}
 
         for i in range(self.max_iter):
-            self.random_search(random_tensor)
+            curr_loads = self.random_search(random_tensor)
             curr_reward, c_hat = self.calc_reward(random_tensor)
             
             if curr_reward > self.reward:
@@ -94,6 +97,8 @@ class HyperGraph:
                 self.sparse_tensor = copy.deepcopy(random_tensor)
 
             random_tensor.clear()
+
+        self.loads = curr_loads
 
     def is_complete(self, sparse_tensor: dict = None) -> bool:
         if sparse_tensor is None:
