@@ -78,15 +78,13 @@ class HyperGraph:
             
             start = stop 
 
-        return teacher_loads
-
     def solve(self) -> None:
         curr_reward = 0
         curr_loads = None
         random_tensor = {}
 
         for i in range(self.max_iter):
-            curr_loads = self.random_search(random_tensor)
+            self.random_search(random_tensor)
             curr_reward, c_hat = self.calc_reward(random_tensor)
             
             if curr_reward > self.reward:
@@ -95,7 +93,6 @@ class HyperGraph:
                 self.c_hat = c_hat
                 self.quality = curr_reward / self.max_reward
                 self.sparse_tensor = copy.deepcopy(random_tensor)
-                self.loads = curr_loads
 
             random_tensor.clear()
 

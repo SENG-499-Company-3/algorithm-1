@@ -40,7 +40,7 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
     pivots = np.asarray(input_data.required_courses)
     max_iter = input_data.max_iter
     p_tgt = input_data.p_tgt
-    loads = np.array([prof.load for prof in input_data.professors])
+    loads = np.asarray([prof.load for prof in input_data.professors])
     prefs = np.zeros(shape=(teachers, courses), dtype=np.uint8) 
     parsed_preferences = [np.asarray(prof.coursePreferences) for prof in input_data.professors]  
     
@@ -70,31 +70,29 @@ def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
 
 
 def validate_driver(schedule: Schedule = None) -> IsValidSchedule:
-    input_data = schedule.input_data
-    courses = input_data.dimensions.courses
-    teachers = input_data.dimensions.teachers
-    times = input_data.dimensions.times
+    input_data = schedule.inputData
     dims = {
-        "courses":  courses,
-        "times":    times,
-        "teachers": teachers
+        "courses" :  input_data.dimensions.courses,
+        "times" :    input_data.dimensions.times,
+        "teachers" : input_data.dimensions.teachers
     }
     pivots = np.asarray(input_data.required_courses)
+    prefs = np.asarray(input_data.preferences)
+    loads = np.asarray(input_data.loads)
     max_iter = input_data.max_iter
     p_tgt = input_data.p_tgt
-    loads = np.array([prof.load for prof in input_data.professors])
-    prefs = np.zeros(shape=(teachers, courses), dtype=np.uint8) 
-    parsed_preferences = [np.asarray(prof.coursePreferences) for prof in input_data.professors]  
-    
-    for i in range(len(parsed_preferences)):
-        row = parsed_preferences[i]
-        prefs[i, :] = row[:]
-    
+    hg = HyperGraph(
+        dims, 
+        prefs, 
+        loads, 
+        pivots, 
+        max_iter, 
+        P, 
+        p_tgt
+    )
     assignments = schedule.assignments
-    hg = HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt) 
-    hg.sparse_tensor = {
-        (i, i, i) : prefs[teacher, course] 
-        for i in range(len(assignments))
+    sparse_tensor = {
+        (ass.course.index, ass.timeslot.index, ass.prof.index) : 1 
+        for ass in assignments
     }
-    valid = hg.is_valid_schedule() 
-    return IsValidSchedule(valid)
+    return IsValidSchedule(valid=hg.is_valid_schedule(sparse_tensor))

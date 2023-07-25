@@ -27,6 +27,7 @@ class InputDataTimeslots(BaseModel):
     day: Optional[List[str]] = None
     length: Optional[int] = None
     startTime: Optional[int] = None
+    index: Optional[int] = None
 
 
 class InputDataCourses(BaseModel):
@@ -36,6 +37,7 @@ class InputDataCourses(BaseModel):
     labsNumber: Optional[int] = None
     tutorialsNumber: Optional[int] = None
     capacity: Optional[int] = None
+    index: Optional[int] = None
 
 
 class InputDataProfessors(BaseModel):
@@ -46,6 +48,7 @@ class InputDataProfessors(BaseModel):
     dayPreferences: Optional[List[str]] = None
     equipmentPreferences: Optional[List[str]] = None
     load: Optional[int] = None
+    index: Optional[int] = None
 
 
 class InputDataDimensions(BaseModel):
@@ -84,3 +87,4 @@ class Schedule(BaseModel):
     complete: Optional[bool] = None
     assignments: Optional[List[Assignment]] = None
     inputData: Optional[InputData] = None
+    sparse_tensor: Optional[List[List[int]]] = None
