@@ -95,10 +95,9 @@ class HyperGraph:
                 self.c_hat = c_hat
                 self.quality = curr_reward / self.max_reward
                 self.sparse_tensor = copy.deepcopy(random_tensor)
+                self.loads = curr_loads
 
             random_tensor.clear()
-
-        self.loads = curr_loads
 
     def is_complete(self, sparse_tensor: dict = None) -> bool:
         if sparse_tensor is None:
