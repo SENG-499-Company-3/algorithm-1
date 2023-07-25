@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
 from hypergraph import HyperGraph
-from drivers import distributed_driver, sequential_driver
+from drivers import distributed_driver, sequential_driver, validate_driver
 from generate_schedule import generate_schedule
 from mock_request import MOCK_REQUEST
 
@@ -70,7 +70,7 @@ def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
-    result = sequential_driver()
+    result = validate_driver(schedule)
 
     match result:
         case None:
@@ -78,10 +78,8 @@ def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error
                 valid=False
             )
 
-        case HyperGraph():
-            return IsValidSchedule(
-                valid=result.is_valid_schedule()
-            )
+        case IsValidSchedule():
+            return result
 
         case _:
             return Error(
