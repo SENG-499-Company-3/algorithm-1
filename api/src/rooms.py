@@ -4,12 +4,18 @@ from hypergraph import HyperGraph
 
 
 def validate_rooms(schedule: Schedule):
-# validates that no classrooms are double booked
+    # validates that no classrooms are double booked
     for i in range(len(schedule.assignments)):
-        for j in range(i+1, len(schedule.assignments)):
-            if schedule.assignments[i].room == schedule.assignments[j].room and schedule.assignments[i].timeslot == schedule.assignments[j].timeslot:
+        for j in range(i + 1, len(schedule.assignments)):
+            if schedule.assignments[i].room == schedule.assignments[j].room and schedule.assignments[i].timeslot == \
+                    schedule.assignments[j].timeslot:
                 return False
+    # validates that no classrooms are over capacity
+    for i in range(len(schedule.assignments)):
+        if schedule.assignments[i].room.capacity < schedule.assignments[i].course.capacity:
+            return False
     return True
+
 
 def add_rooms(hypergraph: HyperGraph = None, input_data: InputData = None):
     time_blocks = [[] for _ in range(input_data.dimensions.times)]

@@ -5,6 +5,7 @@ from models import Success, Error, InputData, IsValidSchedule, Schedule
 #from hypergraph import HyperGraph
 from generate_schedule import generate_schedule, is_schedule_valid
 from mock_request import MOCK_REQUEST
+from mock_schedule import MOCK_SCHEDULE, MOCK_INVALID_ROOMS_SCHEDULE, MOCK_SIMPLE_INVALID_ROOMS_SCHEDULE
 
 app = FastAPI(
     title="SENG 499 API",
@@ -64,7 +65,7 @@ def create_schedule(input_data: InputData = MOCK_REQUEST) -> Union[Schedule, Err
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error]:
+def validate_schedule(schedule: Schedule = MOCK_SCHEDULE) -> Union[IsValidSchedule, Error]:
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
