@@ -46,7 +46,6 @@ class InputDataProfessors(BaseModel):
     dayPreferences: Optional[List[str]] = None
     equipmentPreferences: Optional[List[str]] = None
 
-
 class InputDataDimensions(BaseModel):
     courses: Optional[int] = None
     times: Optional[int] = None
