@@ -6,7 +6,7 @@ from hypergraph import HyperGraph
 from drivers import distributed_driver, sequential_driver, validate_driver
 from generate_schedule import generate_schedule
 from mock_input_data import MOCK_INPUT_DATA
-from mock_schedule import MOCK_SCHEDULE
+from mock_schedule import MOCK_SCHEDULE, MOCK_INVALID_ROOMS_SCHEDULE, MOCK_SIMPLE_INVALID_ROOMS_SCHEDULE
 
 
 app = FastAPI(
@@ -68,7 +68,7 @@ def create_schedule(input_data: InputData = MOCK_INPUT_DATA) -> Union[Schedule, 
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def validate_schedule(schedule: Schedule = MOCK_SCHEDULE) -> Union[IsValidSchedule, Error]:
+def validate_schedule(schedule: Schedule = MOCK_INVALID_ROOMS_SCHEDULE) -> Union[IsValidSchedule, Error]:
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
