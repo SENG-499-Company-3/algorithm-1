@@ -3,15 +3,19 @@ import numpy as np
 from typing import List, Union
 from hypergraph import HyperGraph
 from models import InputData, Schedule, IsValidSchedule
+from simulate import probs
 
 
 courses, times, teachers, num_rooms = 33, 15, 29, 123
 dims = {"courses": courses, "times": times, "teachers": teachers, "rooms": num_rooms}
-prefs = np.random.randint(7, size=(teachers, courses), dtype=np.uint64)
-loads = np.array([3 for i in range(teachers)], dtype=np.uint64)
+prefs_og = np.loadtxt('./formatted_prefs.csv', delimiter=',')
+loads_og = np.loadtxt('./formatted_loads.csv', delimiter=',')
+P = np.arange(0,7, dtype=np.uint64)
+L = np.arange(0, 5, dtype=np.uint64)
+prefs = np.random.choice(P, size=(teachers, courses), p=probs(8, prefs_og))
+loads = np.random.choice(L, size=teachers, p=probs(6, loads_og))
 pivots = np.array([6,13,24,33], dtype=np.uint64)
 max_iter = 500
-P = np.arange(0, 7, dtype=np.uint64)
 p_tgt = 4
 num_workers = 8
 batch_size = 1
