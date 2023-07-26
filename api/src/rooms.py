@@ -4,13 +4,13 @@ from hypergraph import HyperGraph
 
 
 def validate_rooms(schedule: Schedule):
-    # validates that no classrooms are double booked
+    room_dict = {}
     for i in range(len(schedule.assignments)):
-        for j in range(i + 1, len(schedule.assignments)):
-            if schedule.assignments[i].room == schedule.assignments[j].room and schedule.assignments[i].timeslot == \
-                    schedule.assignments[j].timeslot:
-                return False
-    # validates that no classrooms are over capacity
+        assignment = (schedule.assignments[i].room.location, schedule.assignments[i].timeslot.startTime, schedule.assignments[i].timeslot.day[0])
+        if assignment in room_dict:
+            return False
+        else:
+            room_dict[assignment] = schedule.assignments[i].course.coursename
     for i in range(len(schedule.assignments)):
         if schedule.assignments[i].room.capacity < schedule.assignments[i].course.capacity:
             return False
