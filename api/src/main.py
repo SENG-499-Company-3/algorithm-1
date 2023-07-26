@@ -3,9 +3,10 @@ from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
 from hypergraph import HyperGraph
-from drivers import distributed_driver, sequential_driver
+from drivers import distributed_driver, sequential_driver, validate_driver
 from generate_schedule import generate_schedule
-from mock_request import MOCK_REQUEST
+from mock_input_data import MOCK_INPUT_DATA
+from mock_schedule import MOCK_SCHEDULE, MOCK_INVALID_ROOMS_SCHEDULE, MOCK_SIMPLE_INVALID_ROOMS_SCHEDULE
 
 
 app = FastAPI(
@@ -33,7 +34,7 @@ app = FastAPI(
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def create_schedule(input_data: InputData = MOCK_REQUEST) -> Union[Schedule, Error]:
+def create_schedule(input_data: InputData = MOCK_INPUT_DATA) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
@@ -48,7 +49,8 @@ def create_schedule(input_data: InputData = MOCK_REQUEST) -> Union[Schedule, Err
                 c_hat=0.0,
                 reward=0.0,
                 quality=0.0,
-                assignments=[]
+                assignments=[],
+                inputData=input_data
             )
 
         case Schedule():
@@ -66,11 +68,11 @@ def create_schedule(input_data: InputData = MOCK_REQUEST) -> Union[Schedule, Err
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error]:
+def validate_schedule(schedule: Schedule = MOCK_INVALID_ROOMS_SCHEDULE) -> Union[IsValidSchedule, Error]:
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
-    result = sequential_driver()
+    result = validate_driver(schedule)
 
     match result:
         case None:
@@ -78,10 +80,8 @@ def validate_schedule(schedule: Schedule = None) -> Union[IsValidSchedule, Error
                 valid=False
             )
 
-        case HyperGraph():
-            return IsValidSchedule(
-                valid=result.is_valid_schedule()
-            )
+        case IsValidSchedule():
+            return result
 
         case _:
             return Error(

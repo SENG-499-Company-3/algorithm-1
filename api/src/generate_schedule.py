@@ -1,35 +1,51 @@
 from __future__ import annotations
-from typing import Optional
+import itertools
+from typing import Optional, Union
 from models import InputData, Assignment, Schedule
 from drivers import distributed_driver
 from hypergraph import HyperGraph
 from rooms import add_rooms
 
 
-def generate_schedule(input_data: InputData):
-    hypergraph = distributed_driver(input_data)
-    rooms_dict = add_rooms(hypergraph, input_data)
+def generate_schedule(input_data: InputData) -> Union[Schedule, None]:
+    hg = distributed_driver(input_data)
+    
+    if hg is None:
+        return None
+
+    rooms_dict = add_rooms(hg, input_data)
     assignments_list = []
 
-    for key in hypergraph.sparse_tensor:
-        course, time, teacher = key
+    for assignment_tuple in hg.sparse_tensor:
+        course, time, teacher = assignment_tuple
+        c_obj = input_data.courses[course]
+        p_obj = input_data.professors[teacher]
+        t_obj = input_data.timeslots[time] 
+        r_obj = rooms_dict[course] 
+        c_obj.index = course
+        p_obj.index = teacher
+        t_obj.index = time
+        p_obj.load -= 1
         assignment = Assignment( 
-            course = input_data.courses[course], 
-            prof = input_data.professors[teacher],
-            timeslot = input_data.timeslots[time], 
-            room = rooms_dict[course]
+            course = c_obj,
+            prof = p_obj,
+            timeslot = t_obj, 
+            room = r_obj
         )
-        Assignment.update_forward_refs() 
         assignments_list.append(assignment)
     
+    input_data.preferences =      [list(pref_row) for pref_row in hg.prefs]
+    input_data.loads =            list(hg.loads)
+    input_data.required_courses = list(hg.pivots)
     schedule = Schedule(
-        iterations = hypergraph.iter, 
-        quality = hypergraph.quality, 
-        c_hat = hypergraph.c_hat,
-        reward = hypergraph.reward, 
-        valid = hypergraph.is_valid_schedule(),
-        complete = hypergraph.is_complete(), 
-        assignments = assignments_list
+        iterations =    int(hg.iter), 
+        quality =       float(hg.quality), 
+        c_hat =         float(hg.c_hat),
+        reward =        float(hg.reward), 
+        valid =         bool(hg.is_valid_schedule()),
+        complete =      bool(hg.is_complete()), 
+        assignments =   assignments_list,
+        inputData =     input_data,
     )
     
     return schedule
