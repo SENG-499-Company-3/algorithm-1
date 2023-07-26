@@ -1,14 +1,18 @@
 from __future__ import annotations
 import itertools
-from typing import Optional
+from typing import Optional, Union
 from models import InputData, Assignment, Schedule
 from drivers import distributed_driver
 from hypergraph import HyperGraph
 from rooms import add_rooms
 
 
-def generate_schedule(input_data: InputData):
+def generate_schedule(input_data: InputData) -> Union[Schedule, None]:
     hg = distributed_driver(input_data)
+    
+    if hg is None:
+        return None
+
     rooms_dict = add_rooms(hg, input_data)
     assignments_list = []
 
@@ -21,13 +25,13 @@ def generate_schedule(input_data: InputData):
         c_obj.index = course
         p_obj.index = teacher
         t_obj.index = time
+        p_obj.load -= 1
         assignment = Assignment( 
             course = c_obj,
             prof = p_obj,
             timeslot = t_obj, 
             room = r_obj
         )
-        assignment.prof.load -= 1
         assignments_list.append(assignment)
     
     input_data.preferences =      [list(pref_row) for pref_row in hg.prefs]

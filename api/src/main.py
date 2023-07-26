@@ -49,7 +49,8 @@ def create_schedule(input_data: InputData = MOCK_INPUT_DATA) -> Union[Schedule, 
                 c_hat=0.0,
                 reward=0.0,
                 quality=0.0,
-                assignments=[]
+                assignments=[],
+                inputData=input_data
             )
 
         case Schedule():

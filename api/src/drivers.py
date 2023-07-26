@@ -29,9 +29,9 @@ def async_solve(hg: HyperGraph) -> Union[HyperGraph, None]:
 
 
 def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
-    courses =  input_data.dimensions.courses
-    teachers = input_data.dimensions.teachers
-    times =    input_data.dimensions.times
+    courses =  len(input_data.courses)
+    teachers = len(input_data.professors)
+    times =    len(input_data.timeslots)
     dims = {
         "courses":  courses,
         "times":    times,
