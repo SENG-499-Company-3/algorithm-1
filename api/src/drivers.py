@@ -91,8 +91,14 @@ def validate_driver(schedule: Schedule = None) -> IsValidSchedule:
         p_tgt
     )
     assignments = schedule.assignments
-    sparse_tensor = {
-        (ass.course.index, ass.timeslot.index, ass.prof.index) : 1 
-        for ass in assignments
-    }
+    sparse_tensor = {}
+    rooms = set()
+    
+    for ass in assignments:
+        booked_room = (ass.room.location, ass.timeslot.startTime, ass.timeslot.day[0])
+        if booked_room in rooms:
+            return IsValidSchedule(valid=False)
+        rooms.add(booked_room)
+        sparse_tensor[(ass.course.index, ass.timeslot.index, ass.prof.index)] = 1
+     
     return IsValidSchedule(valid=hg.is_valid_schedule(sparse_tensor))
