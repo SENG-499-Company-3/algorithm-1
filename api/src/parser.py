@@ -10,7 +10,7 @@ def parse(input_data: InputData) -> None:
         input_data.max_iter = 500
     
     input_data.dimensions.courses =  len(input_data.courses)
-    input_data.dimensions.times =     len(input_data.timeslots)
+    input_data.dimensions.times =    len(input_data.timeslots)
     input_data.dimensions.teachers = len(input_data.professors) 
     input_data.preferences =         [prof.coursePreferences for prof in input_data.professors]   
     input_data.loads =               [prof.load for prof in input_data.professors] 
