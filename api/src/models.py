@@ -39,7 +39,6 @@ class InputDataCourses(BaseModel):
 
 class InputDataProfessors(BaseModel):
     name: Optional[str] = None
-    courses: Optional[List[str]] = None
     coursePreferences: Optional[List[int]] = None
     load: Optional[int] = None
     index: Optional[int] = None
@@ -67,17 +66,17 @@ class InputData(BaseModel):
     dimensions: Optional[InputDataDimensions] = None
     preferences: Optional[List[List[int]]] = None
     loads: Optional[List[int]] = None
-    availabilities: Optional[List[List[int]]] = None
+    required_courses: Optional[List[int]] = None
     p_tgt: Optional[int] = None
     max_iter: Optional[int] = None
 
 
 class Schedule(BaseModel):
-    assignments: List[Assignment]
+    iterations: int
+    quality: float
     valid: bool
     complete: bool
     reward: float
-    iterations: int
     c_hat: float
-    quality: float
-    inputData: InputData
+    assignments: List[Assignment]
+    inputData: Optional[InputData] = None
