@@ -1,18 +1,12 @@
 from __future__ import annotations
-import itertools
-from typing import Optional, Union
 from models import InputData, Assignment, Schedule
-from drivers import distributed_driver
+from drivers import sequential_driver
 from hypergraph import HyperGraph
 from rooms import add_rooms
 
 
-def generate_schedule(input_data: InputData) -> Union[Schedule, None]:
-    hg = distributed_driver(input_data)
-    
-    if hg is None:
-        return None
-
+def generate_schedule(input_data: InputData) -> Schedule:
+    hg = sequential_driver(input_data)
     rooms_dict = add_rooms(hg, input_data)
     assignments_list = []
 

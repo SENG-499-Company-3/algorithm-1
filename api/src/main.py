@@ -3,10 +3,11 @@ from fastapi import FastAPI
 from typing import Union
 from models import Success, Error, InputData, IsValidSchedule, Schedule
 from hypergraph import HyperGraph
-from drivers import distributed_driver, sequential_driver, validate_driver
+from drivers import validate_driver
+from parser import parse
 from generate_schedule import generate_schedule
 from mock_input_data import MOCK_INPUT_DATA
-from mock_schedule import MOCK_SCHEDULE, MOCK_INVALID_ROOMS_SCHEDULE, MOCK_SIMPLE_INVALID_ROOMS_SCHEDULE
+from mock_schedule import MOCK_SCHEDULE, MOCK_INVALID_ROOMS_SCHEDULE
 
 
 app = FastAPI(
@@ -38,6 +39,7 @@ def create_schedule(input_data: InputData = MOCK_INPUT_DATA) -> Union[Schedule, 
     """
     Algorithm 1 endpoint to generate a schedule
     """
+    parse(input_data)
     result = generate_schedule(input_data)
 
     match result:
