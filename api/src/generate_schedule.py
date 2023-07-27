@@ -6,7 +6,7 @@ from rooms import add_rooms
 
 
 def generate_schedule(input_data: InputData) -> Schedule:
-    hg = distributed_driver(input_data)
+    hg = sequential_driver(input_data)
     rooms_dict = add_rooms(hg, input_data)
     assignments_list = []
 
