@@ -5,19 +5,21 @@ from hypergraph import HyperGraph
 from models import InputData, Schedule, IsValidSchedule
 from simulate import probs
 
+
 P = np.arange(0, 7, dtype=np.uint8)
 
+
 def sequential_driver(input_data: InputData = None) -> HyperGraph:
-    max_iter = input_data.max_iter
-    p_tgt =    input_data.p_tgt 
     dims = {
         "courses"  : input_data.dimensions.courses,
         "times"    : input_data.dimensions.times,
         "teachers" : input_data.dimensions.teachers
     }
     pivots =   np.asarray(input_data.required_courses, dtype=np.uint64)
-    loads =    np.asarray([prof.load for prof in input_data.professors], np.uint64)
-    prefs =    np.asarray([np.asarray(prof.coursePreferences) for prof in input_data.professors])
+    loads =    np.asarray(input_data.loads, np.uint64)
+    prefs =    np.asarray([np.asarray(row) for row in input_data.preferences], np.uint8)
+    max_iter = input_data.max_iter
+    p_tgt =    input_data.p_tgt  
     hg =       HyperGraph(dims, prefs, loads, pivots, max_iter, P, p_tgt)
     hg.solve()
     return hg
@@ -29,15 +31,15 @@ def async_solve(hg: HyperGraph) -> Union[HyperGraph, None]:
 
 
 def distributed_driver(input_data: InputData = None) -> Union[HyperGraph, None]:
-    num_workers = 8
+    num_workers = 4
     batch_size = 1
     dims = {
         "courses"  : input_data.dimensions.courses,
         "times"    : input_data.dimensions.times,
         "teachers" : input_data.dimensions.teachers
     }
-    prefs =    np.asarray([np.asarray(prof.coursePreferences) for prof in input_data.professors])
-    loads =    np.asarray([prof.load for prof in input_data.professors], np.uint64)
+    prefs =    np.asarray([np.asarray(row) for row in input_data.preferences], np.uint8)
+    loads =    np.asarray(input_data.loads, np.uint64)
     pivots =   np.asarray(input_data.required_courses, dtype=np.uint64)
     max_iter = input_data.max_iter
     p_tgt =    input_data.p_tgt 
@@ -70,9 +72,9 @@ def validate_driver(schedule: Schedule = None) -> IsValidSchedule:
         "times"    : input_data.dimensions.times,
         "teachers" : input_data.dimensions.teachers
     }
-    prefs =      np.asarray([np.asarray(pref_row) for pref_row in input_data.preferences])
-    loads =      np.asarray(input_data.loads)
-    pivots =     np.asarray(input_data.required_courses)
+    prefs =      np.asarray([np.asarray(row) for row in input_data.preferences], np.uint8)
+    loads =      np.asarray(input_data.loads, dtype=np.uint64)
+    pivots =     np.asarray(input_data.required_courses, np.uint64)
     max_iter =   input_data.max_iter
     p_tgt =      input_data.p_tgt
     hg = HyperGraph(

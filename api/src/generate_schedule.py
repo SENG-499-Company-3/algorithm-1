@@ -1,12 +1,12 @@
 from __future__ import annotations
 from models import InputData, Assignment, Schedule
-from drivers import sequential_driver
+from drivers import sequential_driver, distributed_driver
 from hypergraph import HyperGraph
 from rooms import add_rooms
 
 
 def generate_schedule(input_data: InputData) -> Schedule:
-    hg = sequential_driver(input_data)
+    hg = distributed_driver(input_data)
     rooms_dict = add_rooms(hg, input_data)
     assignments_list = []
 
@@ -28,9 +28,6 @@ def generate_schedule(input_data: InputData) -> Schedule:
         )
         assignments_list.append(assignment)
     
-    input_data.preferences =      [list(pref_row) for pref_row in hg.prefs]
-    input_data.loads =            list(hg.loads)
-    input_data.required_courses = list(hg.pivots)
     schedule = Schedule(
         iterations =    int(hg.iter), 
         quality =       float(hg.quality), 

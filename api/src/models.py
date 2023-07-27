@@ -14,13 +14,12 @@ class Success(BaseModel):
 
 
 class IsValidSchedule(BaseModel):
-    valid: bool
+    valid: Optional[bool] = None
 
 
 class InputDataRooms(BaseModel):
     location: Optional[str] = None
     capacity: Optional[int] = None
-    equipment: Optional[List[str]] = None
 
 
 class InputDataTimeslots(BaseModel):
@@ -32,10 +31,8 @@ class InputDataTimeslots(BaseModel):
 
 class InputDataCourses(BaseModel):
     coursename: Optional[str] = None
-    noScheduleOverlap: Optional[List[str]] = None
-    lecturesNumber: Optional[int] = None
-    labsNumber: Optional[int] = None
-    tutorialsNumber: Optional[int] = None
+    courseYear: Optional[int] = None
+    courseNumber: Optional[int] = None
     capacity: Optional[int] = None
     index: Optional[int] = None
 
@@ -43,10 +40,7 @@ class InputDataCourses(BaseModel):
 class InputDataProfessors(BaseModel):
     name: Optional[str] = None
     courses: Optional[List[str]] = None
-    timePreferences: Optional[List[str]] = None
     coursePreferences: Optional[List[int]] = None
-    dayPreferences: Optional[List[str]] = None
-    equipmentPreferences: Optional[List[str]] = None
     load: Optional[int] = None
     index: Optional[int] = None
 
@@ -58,6 +52,13 @@ class InputDataDimensions(BaseModel):
     rooms: Optional[int] = None
 
 
+class Assignment(BaseModel):
+    course: InputDataCourses
+    prof: InputDataProfessors
+    timeslot: InputDataTimeslots
+    room: InputDataRooms
+
+
 class InputData(BaseModel):
     rooms: Optional[List[InputDataRooms]] = None
     timeslots: Optional[List[InputDataTimeslots]] = None
@@ -66,24 +67,17 @@ class InputData(BaseModel):
     dimensions: Optional[InputDataDimensions] = None
     preferences: Optional[List[List[int]]] = None
     loads: Optional[List[int]] = None
-    required_courses: Optional[List[int]] = None
+    availabilities: Optional[List[List[int]]] = None
     p_tgt: Optional[int] = None
     max_iter: Optional[int] = None
 
 
-class Assignment(BaseModel):
-    course: Optional[InputDataCourses] = None
-    prof: Optional[InputDataProfessors] = None
-    timeslot: Optional[InputDataTimeslots] = None
-    room: Optional[InputDataRooms] = None
-
-
 class Schedule(BaseModel):
-    iterations: Optional[int] = None
-    quality: Optional[float] = None
-    c_hat: Optional[float] = None
-    reward: Optional[float] = None
-    valid: Optional[bool] = None
-    complete: Optional[bool] = None
-    assignments: Optional[List[Assignment]] = None
-    inputData: Optional[InputData] = None
+    assignments: List[Assignment]
+    valid: bool
+    complete: bool
+    reward: float
+    iterations: int
+    c_hat: float
+    quality: float
+    inputData: InputData
