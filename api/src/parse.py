@@ -19,9 +19,10 @@ def parse(input_data: InputData) -> None:
             input_data.preferences.append([0] * input_data.dimensions.courses)
             continue
         
+        vals = [] 
         prof.coursePreferences.sort(key=lambda pref: pref.courseNumber)
         pref_course_dict = {pc.courseName:pc for pc in prof.coursePreferences}
-        vals = []
+
         for course in input_data.courses:
             if course.coursename in pref_course_dict:
                 vals.append(pref_course_dict[course.coursename].value)
@@ -29,7 +30,7 @@ def parse(input_data: InputData) -> None:
                 vals.append(0)
 
         input_data.preferences.append(vals)
-    print(np.count_nonzero(input_data.preferences)) 
+    
     input_data.dimensions.teachers = len(input_data.professors) 
     input_data.courses.sort(key=lambda course: course.courseNumber) 
     required_courses = {
