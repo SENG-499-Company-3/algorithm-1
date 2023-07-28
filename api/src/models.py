@@ -38,8 +38,6 @@ class InputDataCourses(BaseModel):
 
 
 class InputDataProfessorsCoursePreferences(BaseModel):
-    email: Optional[str] = None
-    load: Optional[int] = None
     courseName: Optional[str] = None
     courseNumber: Optional[int] = None
     courseYear: Optional[int] = None
