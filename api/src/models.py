@@ -37,9 +37,18 @@ class InputDataCourses(BaseModel):
     index: Optional[int] = None
 
 
+class InputDataProfessorsCoursePreferences(BaseModel):
+    email: Optional[str] = None
+    load: Optional[int] = None
+    courseName: Optional[str] = None
+    courseNumber: Optional[int] = None
+    courseYear: Optional[int] = None
+    value: Optional[int] = None
+        
+
 class InputDataProfessors(BaseModel):
     name: Optional[str] = None
-    coursePreferences: Optional[List[int]] = None
+    coursePreferences: Optional[List[InputDataProfessorsCoursePreferences]] = None
     load: Optional[int] = None
     index: Optional[int] = None
 
