@@ -44,7 +44,7 @@ class InputDataProfessorsCoursePreferences(BaseModel):
     courseNumber: Optional[int] = None
     courseYear: Optional[int] = None
     value: Optional[int] = None
-        
+ 
 
 class InputDataProfessors(BaseModel):
     name: Optional[str] = None
