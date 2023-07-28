@@ -91,8 +91,12 @@ def validate_driver(schedule: Schedule = None) -> IsValidSchedule:
     rooms = set()
     
     for ass in assignments:
-        booked_room = (ass.room.location, ass.timeslot.startTime, ass.timeslot.day[0])
-        
+        if ass.timeslot.day:
+            booked_room = (ass.room.location, ass.timeslot.startTime, ass.timeslot.day[0])
+
+        else:
+            continue
+
         if booked_room in rooms:
             return IsValidSchedule(valid=False)
         
