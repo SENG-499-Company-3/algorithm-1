@@ -7,7 +7,6 @@ from drivers import validate_driver
 from parse import parse
 from generate_schedule import generate_schedule
 from mock_input_data import MOCK_INPUT_DATA
-from mock_schedule import MOCK_VALID_SCHEDULE, MOCK_INVALID_PROFESSOR_SCHEDULE
 
 
 app = FastAPI(
@@ -35,7 +34,7 @@ app = FastAPI(
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def create_schedule(input_data: InputData = MOCK_INPUT_DATA) -> Union[Schedule, Error]:
+def create_schedule(input_data: InputData) -> Union[Schedule, Error]:
     """
     Algorithm 1 endpoint to generate a schedule
     """
@@ -70,7 +69,7 @@ def create_schedule(input_data: InputData = MOCK_INPUT_DATA) -> Union[Schedule, 
     responses={"400": {"model": Error}},
     tags=["algorithm1"],
 )
-def validate_schedule(schedule: Schedule = MOCK_INVALID_PROFESSOR_SCHEDULE) -> Union[IsValidSchedule, Error]:
+def validate_schedule(schedule: Schedule) -> Union[IsValidSchedule, Error]:
     """
     Algorithm 1 endpoint to validate an existing schedule
     """
