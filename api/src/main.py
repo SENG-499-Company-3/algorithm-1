@@ -6,7 +6,6 @@ from hypergraph import HyperGraph
 from drivers import validate_driver
 from parse import parse
 from generate_schedule import generate_schedule
-from mock_input_data import MOCK_INPUT_DATA
 
 
 app = FastAPI(
